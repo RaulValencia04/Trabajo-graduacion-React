@@ -1,0 +1,137 @@
+.container {
+    font-family: 'Roboto Condensed';
+    display: flex;
+    place-items: center;
+    justify-content: center;
+    padding: 0;
+    background-color: white;
+}
+
+h1 {
+    color: #e1a738;
+    text-align: center;
+    font-size: 7vw;
+    margin-top: 10vh;
+    letter-spacing: 3px;
+    position: absolute;
+    width: 100%;
+}
+
+.icon {
+    display: inline-block;
+    width: 1.5em;
+    height: 1.5em;
+    fill: none;
+}
+
+.hidden {
+    display: none;
+}
+
+.progress2 {
+    display: flex;
+    place-items: center;
+    align-items: center;
+    width: 80%;
+    height: 300px;
+    padding: 5%;
+    background-color: white;
+}
+
+.step {
+    flex-grow: 1;
+    position: relative;
+}
+
+.step-progress {
+    width: 100%;
+    height: 0.25em;
+    background: #800101;
+    position: relative;
+}
+
+.step-progress::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 0.25em;
+    width: 0;
+    background-color: #e1a738;
+    transition: width 1s linear;
+}
+
+.step.done .step-progress::after {
+    width: 100%;
+}
+
+.icon-wrapper {
+    text-align: center;
+    display: inline-block;
+}
+
+.icon-checkmark {
+    position: absolute;
+    top: -0.55em;
+    left: -0.125em;
+    border: 0.125em solid #e1a738;
+    background: white;
+    width: 1em;
+    height: 1em;
+    border-radius: 50%;
+    padding: 0.125em;
+    transition: all 0.25s linear;
+}
+
+.step.done .icon-checkmark {
+    background: #e1a738;
+    border-color: #e1a738;
+}
+
+.icon-checkmark .path1 {
+    stroke: #800101;
+    stroke-width: 4;
+    stroke-linecap: square;
+    stroke-dasharray: 1000;
+    stroke-dashoffset: 1000;
+    fill: none;
+}
+
+.step.done .icon-checkmark .path1 {
+    animation: dash 2s linear forwards;
+    stroke: white;
+}
+
+.step-text {
+    position: relative;
+    margin-left: -50%;
+    letter-spacing: 1px;
+    font-weight: bold;
+    color: #800101;
+    margin-top: 0;
+    opacity: 0;
+}
+
+.step.done .step-text {
+    color: #e1a738;
+    animation: dropText 0.5s linear forwards;
+}
+
+@keyframes dash {
+    to {
+        stroke-dashoffset: 0;
+    }
+}
+
+@keyframes dropText {
+    to {
+        padding-top:0em;
+        opacity: 1;
+    }
+}
+.title {
+    text-align: center;
+    color: #7a5c61; /* Pastel purple */
+    margin-bottom: 20px;
+    font-family: 'Arial', sans-serif;
+  }

@@ -1,0 +1,45 @@
+.auditoria-container {
+    margin: 20px;
+    padding: 20px;
+    border-radius: 8px;
+    background-color: #f7f3e9; /* Light pastel background */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+  
+  .title {
+    text-align: center;
+    color: #7a5c61; /* Pastel purple */
+    margin-bottom: 20px;
+    font-family: 'Arial', sans-serif;
+  }
+  
+  .tabla-auditoria {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+  }
+  
+  .tabla-auditoria th, .tabla-auditoria td {
+    padding: 12px;
+    text-align: center;
+    border: 1px solid #ddd;
+  }
+  
+  .tabla-auditoria th {
+    background-color: #e8d7c1; /* Soft pastel brown */
+    color: #333;
+    font-weight: bold;
+  }
+  
+  .tabla-auditoria td {
+    background-color: #fff;
+  }
+  
+  .detalles {
+    text-align: left;
+    background-color: #f7f7f7;
+    padding: 8px;
+    border-radius: 5px;
+    font-size: 0.9em;
+  }
+  

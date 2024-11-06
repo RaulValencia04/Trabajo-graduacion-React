@@ -1,0 +1,135 @@
+.container {
+  margin: 20px;
+  padding: 20px;
+  border-radius: 8px;
+  background-color: #f7f3e9; /* Light pastel background */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.title {
+  text-align: center;
+  color: #7a5c61; /* Pastel purple */
+  margin-bottom: 20px;
+  font-family: 'Arial', sans-serif;
+}
+
+.tabla-propuestas {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+}
+
+.tabla-propuestas th, .tabla-propuestas td {
+  padding: 12px;
+  text-align: center;
+  border: 1px solid #ddd;
+}
+
+.tabla-propuestas th {
+  background-color: #e8d7c1; /* Soft pastel brown */
+  color: #333;
+  font-weight: bold;
+}
+
+.tabla-propuestas td {
+  background-color: #fff;
+}
+
+.btn-aprobar, .btn-descargar {
+  background-color: #8aa7a9; /* Soft pastel green */
+  color: #fff;
+  border: none;
+  padding: 8px 16px;
+  margin: 5px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.btn-aprobar:hover, .btn-descargar:hover {
+  background-color: #6c8b8e; /* Darker shade */
+}
+
+/* Estado estilos */
+.estado {
+  padding: 5px 10px;
+  border-radius: 5px;
+  color: #fff;
+  font-weight: bold;
+}
+
+.estado.en-espera {
+  background-color: #f0ad4e; /* Amber for "En espera" */
+}
+
+.estado.en-progreso {
+  background-color: #5bc0de; /* Light blue for "En Progreso" */
+}
+
+.estado.completado {
+  background-color: #5cb85c; /* Green for "Completado" */
+}
+
+.estado.rechazado {
+  background-color: #d9534f; /* Red for "Rechazado" */
+}
+
+.estado.abandonado {
+  background-color: #6c757d; /* Gray for "Abandonado" */
+}
+
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.modal-content {
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  width: 400px;
+  text-align: center;
+}
+
+.select-asesor {
+  margin-top: 10px;
+  padding: 8px;
+  width: 80%;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+.btn-asignar {
+  background-color: #a28089; /* Soft pastel pink */
+  color: #fff;
+  border: none;
+  padding: 10px 20px;
+  margin-top: 10px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.btn-cerrar {
+  background-color: #d9534f; /* Red */
+  color: #fff;
+  border: none;
+  padding: 10px 20px;
+  margin-top: 10px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.btn-asignar:hover {
+  background-color: #8f5f63; /* Darker pastel pink */
+}
+
+.btn-cerrar:hover {
+  background-color: #c12e2a; /* Darker red */
+}

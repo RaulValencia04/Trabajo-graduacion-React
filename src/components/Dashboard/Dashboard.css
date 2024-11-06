@@ -1,0 +1,27 @@
+.container{
+    display: flex;
+    justify-content: center;
+    place-items: center;
+    align-items: center;
+    width: 100%;
+    text-align: center;
+    
+}
+.video{
+    background-color: white;
+    display: flex;
+    place-items: center;
+    justify-content: center;
+    width: 700px;
+    height: 500px;
+    border-radius: 5%;
+    margin: 25px;
+
+}
+.title {
+    text-align: center;
+    color: #7a5c61; /* Pastel purple */
+    margin-bottom: 20px;
+    font-family: 'Arial', sans-serif;
+  
+  }

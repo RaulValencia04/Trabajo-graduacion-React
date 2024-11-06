@@ -1,0 +1,67 @@
+.table-container {
+    margin: 40px auto;
+    padding: 30px;
+    max-width: 1200px; /* Ancho máximo para una buena visualización */
+    border-radius: 10px;
+    background-color: #f7f3e9; /* Light pastel background */
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+  }
+  
+  .table-title {
+    text-align: center;
+    color: #7a5c61; /* Pastel purple */
+    margin-bottom: 30px;
+    font-family: 'Arial', sans-serif;
+  }
+  
+  .alumno-proyectos-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+  }
+  
+  .alumno-proyectos-table th, .alumno-proyectos-table td {
+    padding: 15px;
+    text-align: center;
+    border: 1px solid #ddd;
+  }
+  
+  .alumno-proyectos-table th {
+    background-color: #e8d7c1; /* Soft pastel brown */
+    color: #333;
+    font-weight: bold;
+  }
+  
+  .alumno-proyectos-table td {
+    background-color: #fff;
+  }
+  
+  .estado-atiempo {
+    color: #5cb85c; /* Green */
+    font-weight: bold;
+  }
+  
+  .estado-retrasado {
+    color: #d9534f; /* Red */
+    font-weight: bold;
+  }
+  
+  .btn-ver-detalles {
+    background-color: #337ab7; /* Bootstrap blue */
+    color: #fff;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+  }
+  
+  .btn-ver-detalles:hover {
+    background-color: #286090; /* Darker blue */
+  }
+  
+  .btn-ver-detalles:focus {
+    outline: none;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+  }
+  

@@ -1,0 +1,120 @@
+body {
+    background-color: #f3f4f6;
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    color: #333;
+  }
+  
+  .registro-container {
+    max-width: 500px;
+    margin: 50px auto;
+    padding: 20px;
+    background-color: #ffffff;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    text-align: center;
+  }
+  
+  .registro-titulo {
+    color: #800000;
+    font-size: 24px;
+    margin-bottom: 20px;
+  }
+  
+  .registro-form label {
+    display: block;
+    margin: 15px 0 5px;
+    font-weight: bold;
+    color: #333;
+  }
+  
+  .registro-form input[type="text"],
+  .registro-form input[type="email"],
+  .registro-form input[type="password"] {
+    width: 100%;
+    padding: 10px;
+    margin-top: 5px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    box-sizing: border-box;
+    font-size: 16px;
+  }
+  
+  .registro-form input[type="text"]:focus,
+  .registro-form input[type="email"]:focus,
+  .registro-form input[type="password"]:focus {
+    outline: none;
+    border-color: #f9b905;
+  }
+  
+  .checkbox-label {
+    display: flex;
+    align-items: center;
+    font-weight: normal;
+    color: #333;
+  }
+  
+  .checkbox-label input[type="checkbox"] {
+    margin-right: 10px;
+    transform: scale(1.2);
+  }
+  
+  .registro-boton {
+    background-color: #800000;
+    color: #ffffff;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 5px;
+    font-size: 18px;
+    cursor: pointer;
+    margin-top: 20px;
+    width: 100%;
+    transition: background-color 0.3s ease;
+  }
+  
+  .registro-boton:hover {
+    background-color: #660000;
+  }
+  
+  /* Mensaje de error */
+  .error-message {
+    color: #dc3545;
+    font-size: 14px;
+    margin-top: -10px;
+    margin-bottom: 10px;
+  }
+  
+  @media (max-width: 600px) {
+    .registro-container {
+      padding: 15px;
+    }
+  
+    .registro-titulo {
+      font-size: 20px;
+    }
+  
+    .registro-form input[type="text"],
+    .registro-form input[type="email"],
+    .registro-form input[type="password"] {
+      font-size: 14px;
+    }
+  
+    .registro-boton {
+      font-size: 16px;
+    }
+  }
+  .recaptcha-container {
+    margin: 20px 0;
+    display: flex;
+    justify-content: center;
+  }
+  
+  .error-message {
+    color: #dc3545;
+    font-size: 14px;
+    margin-top: -10px;
+    margin-bottom: 10px;
+  }
+  
+  

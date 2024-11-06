@@ -1,0 +1,95 @@
+body{
+  width: 100%;
+}
+.container {
+    margin-left: 250px; /* Ensure it aligns with the sidebar width */
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    width: 800px;
+  }
+  
+  .title {
+    font-size: 24px;
+    color: #8B0000;
+    margin-bottom: 20px;
+    text-align: center; /* Center the title for better appearance */
+  }
+  
+  .enlace-crear-usuario {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 20px;
+  }
+  
+  .boton-crear-usuario {
+    background-color: #f0ad4e;
+    color: #fff;
+    padding: 10px 20px;
+    border-radius: 5px;
+    text-decoration: none;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    gap: 10px; /* Add space between the icon and text */
+  }
+  
+  .boton-crear-usuario:hover {
+    background-color: #ec971f;
+  }
+  
+  .buscador {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    margin-bottom: 20px;
+  }
+  
+  .input-busqueda, .select-filtro {
+    padding: 10px;
+    width: 200px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+  }
+  
+  .lista-usuarios {
+    overflow-x: auto; /* Prevent overflow for wider tables */
+  }
+  
+  .tabla-usuarios {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 0 auto; /* Center the table */
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  }
+  
+  .tabla-usuarios th, .tabla-usuarios td {
+    padding: 10px;
+    text-align: center;
+    border: 1px solid #ddd;
+  }
+  
+  .tabla-usuarios th {
+    background-color: #f4f4f4;
+    color: #333;
+    font-weight: bold;
+  }
+  
+  .tabla-usuarios td {
+    background-color: #fff;
+  }
+  
+  .boton-estado {
+    background-color: #d9534f;
+    color: #fff;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  
+  .boton-estado:hover {
+    background-color: #c9302c;
+  }
+  

@@ -1,0 +1,41 @@
+.infodocs-container {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    height: 20%;
+    padding: 20px;
+    /* background-color: #f8f9fa; */
+}
+
+.infodocs-card {
+    width: 200px;
+    height: 75%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    background-color: #ffffff;
+    border: 1px solid #dddddd;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s, box-shadow 0.2s;
+    cursor: pointer;
+}
+
+.infodocs-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 12px rgba(0, 0, 0, 0.2);
+}
+
+.infodocs-card h3 {
+    margin: 0;
+    font-size: 18px;
+    color: #333333;
+    margin-bottom: 10px; /* Agrega un pequeño margen debajo del texto */
+}
+
+.infodocs-card svg {
+    margin-top: 10px; /* Agrega espacio encima del ícono */
+    fill: #333333; /* Color del ícono */
+}

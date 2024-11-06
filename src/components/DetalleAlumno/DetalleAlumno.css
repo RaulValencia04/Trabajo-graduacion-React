@@ -1,0 +1,131 @@
+body {
+    background-color: #F3F4F6;
+    font-family: 'Open Sans', sans-serif;
+  }
+  
+  .title {
+    text-align: center;
+    margin-top: 30px;
+    font-size: 40px;
+    color: #2b3a40;
+  }
+  
+  .detalle-alumno-container {
+    background-color: #ffffff;
+    max-width: 100%; /* Más ancho */
+    margin: 50px auto;
+    border-top: 4px solid #5a5a5a;
+    border-radius: 8px;
+    line-height: 1.6;
+    box-shadow: 2px 2px 12px 0px #a4bac1;
+    padding: 20px;
+  }
+  
+  .accordion-content {
+    border-bottom: 1px solid #e0e0e0;
+    margin-bottom: 15px;
+  }
+  
+  .accordion-content-title {
+    padding: 15px 15px 15px 40px;
+    display: block;
+    position: relative;
+    font-weight: 600;
+    font-size: 18px;
+    cursor: pointer;
+    color: #333;
+    background-color: #f9f9f9;
+    border-radius: 5px;
+  }
+  
+  .accordion-content-title:hover {
+    background-color: #e6e6e6;
+  }
+  
+  .accordion__content {
+    transition: height 0.3s ease-out;
+    height: 0;
+    overflow: hidden;
+  }
+  
+  .accordion-content.is-expanded .accordion__content {
+    height: auto;
+  }
+  
+  .accordion-content-description {
+    padding: 20px 40px 10px 40px;
+  }
+  
+  /* Estilos para entregas aceptadas */
+  .accordion-content.aceptada .accordion-content-title {
+    background-color: #eaf4e9;
+    color: #27632a;
+    border-left: 4px solid #2e7d32;
+  }
+  
+  /* Estilos para entregas rechazadas */
+  .accordion-content.rechazada .accordion-content-title {
+    background-color: #fbe4e6;
+    color: #ab2b2b;
+    border-left: 4px solid #c62828;
+  }
+  
+  /* Estilos para entregas pendientes */
+  .accordion-content.pendiente .accordion-content-title {
+    background-color: #fff7e6;
+    color: #8a6d3b;
+    border-left: 4px solid #ff9800;
+  }
+  
+  .comentario-textarea {
+    width: 100%;
+    height: 100px;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    margin-bottom: 15px;
+  }
+  
+  .btn-descargar, .btn-aprobar-rechazar, .btn-confirmar, .btn-cerrar {
+    background-color: #3f51b5; /* Azul */
+    color: #fff;
+    border: none;
+    padding: 10px 20px;
+    margin: 10px 0;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    width: 100%;
+  }
+  
+  .btn-descargar:hover, .btn-aprobar-rechazar:hover, .btn-confirmar:hover, .btn-cerrar:hover {
+    background-color: #303f9f; /* Azul más oscuro */
+  }
+  
+  .checkbox-container {
+    margin: 15px 0;
+  }
+  
+  .modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  .modal-content {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    width: 400px;
+    text-align: center;
+  }
+  .accordion{
+    width: 100%;
+  }

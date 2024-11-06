@@ -1,0 +1,121 @@
+.container {
+    margin: 20px;
+    padding: 20px;
+    border-radius: 8px;
+    background-color: #f7f3e9; /* Light pastel background */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+  
+  .title {
+    text-align: center;
+    color: #7a5c61; /* Pastel purple */
+    margin-bottom: 20px;
+    font-family: 'Arial', sans-serif;
+  }
+  
+  .filter-container {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 20px;
+  }
+  
+  .input-filtro {
+    padding: 10px;
+    width: 300px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+  }
+  
+  .tabla-proyectos {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+  }
+  
+  .tabla-proyectos th, .tabla-proyectos td {
+    padding: 12px;
+    text-align: center;
+    border: 1px solid #ddd;
+  }
+  
+  .tabla-proyectos th {
+    background-color: #e8d7c1; /* Soft pastel brown */
+    color: #333;
+    font-weight: bold;
+  }
+  
+  .tabla-proyectos td {
+    background-color: #fff;
+  }
+  
+  .btn-entregas, .btn-cambiar-asesor {
+    background-color: #8aa7a9; /* Soft pastel green */
+    color: #fff;
+    border: none;
+    padding: 8px 16px;
+    margin: 5px;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  
+  .btn-entregas:hover, .btn-cambiar-asesor:hover {
+    background-color: #6c8b8e; /* Darker shade */
+  }
+  
+  .modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  .modal-content {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    width: 400px;
+    text-align: center;
+  }
+  
+  .select-asesor {
+    margin-top: 10px;
+    padding: 8px;
+    width: 80%;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+  }
+  
+  .checkbox-container {
+    margin: 15px 0;
+    text-align: left;
+  }
+  
+  .btn-asignar, .btn-cerrar {
+    background-color: #a28089; /* Soft pastel pink */
+    color: #fff;
+    border: none;
+    padding: 10px 20px;
+    margin-top: 10px;
+    margin-right: 5px;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  
+  .btn-asignar:hover {
+    background-color: #8f5f63; /* Darker pastel pink */
+  }
+  
+  .btn-cerrar {
+    background-color: #d9534f; /* Red */
+  }
+  
+  .btn-cerrar:hover {
+    background-color: #c12e2a; /* Darker red */
+  }
+  
