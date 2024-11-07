@@ -1,7 +1,7 @@
 import React, { useState, useContext, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import {jwtDecode} from 'jwt-decode';
-import { AuthContext } from '../Auth/Context/AuthContext';
+import {jwtDecode} from 'jwt-decode'; // Importación correcta
+import { AuthContext } from './Context/AuthContext';
 import './Login.css';
 
 const Login = () => {
@@ -11,12 +11,34 @@ const Login = () => {
     const navigate = useNavigate();
     const { state, dispatch } = useContext(AuthContext);
 
-    // Redirigir automáticamente al usuario autenticado
+    // Redirigir automáticamente al usuario autenticado si hay un token válido en sessionStorage
     useEffect(() => {
-        if (state.logged) {
-            navigate('/inicio');
+        const token = sessionStorage.getItem('token');
+        if (token) {
+            try {
+                const decodedToken = jwtDecode(token);
+
+                // Verificar si el token ha expirado
+                if (decodedToken.exp * 1000 > Date.now()) {
+                    dispatch({
+                        type: 'login',
+                        payload: {
+                            token,
+                            role: decodedToken.role,
+                            email: decodedToken.sub,
+                        },
+                    });
+                    navigate('/inicio', { replace: true });
+                } else {
+                    // Si el token ha expirado, se remueve de sessionStorage
+                    sessionStorage.removeItem('token');
+                }
+            } catch (error) {
+                console.error('Error al decodificar el token:', error);
+                sessionStorage.removeItem('token');
+            }
         }
-    }, [state.logged, navigate]);
+    }, [dispatch, navigate]);
 
     const handleLogin = async (e) => {
         e.preventDefault();
@@ -54,7 +76,7 @@ const Login = () => {
             sessionStorage.setItem('token', token);
 
             // Redirigir al usuario a la página de inicio
-            navigate('/inicio');
+            navigate('/inicio', { replace: true });
         } catch (err) {
             console.error('Error durante el login:', err);
             setError('Error de inicio de sesión. Verifica tus credenciales e inténtalo de nuevo.');

@@ -1,16 +1,27 @@
-import React, { useReducer } from 'react';
-import { AuthContext } from './AuthContext';
+import React, { createContext, useReducer } from 'react';
 import { authReducer } from './AuthReducer';
-const InitialState = {
+
+export const AuthContext = createContext();
+
+const initialState = {
     logged: false,
-    role: null, // Añadimos el rol del usuario
+    token: null,
+    role: null,
+    email: null,
 };
 
 export const AuthProvider = ({ children }) => {
-    const [state, dispatch] = useReducer(authReducer, InitialState);
+    const [state, dispatch] = useReducer(authReducer, initialState);
+
+    const logout = () => {
+        // Remover el token de sessionStorage
+        sessionStorage.removeItem('token');
+        // Despachar la acción de logout
+        dispatch({ type: 'logout' });
+    };
 
     return (
-        <AuthContext.Provider value={{ state, dispatch }}>
+        <AuthContext.Provider value={{ state, dispatch, logout }}>
             {children}
         </AuthContext.Provider>
     );

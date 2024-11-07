@@ -1,9 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom'; // Importa useNavigate
+import {jwtDecode} from 'jwt-decode'; // Importa jwtDecode si no lo tienes ya instalado
+import { AuthContext } from '../Auth/Context/AuthContext';
 import './RegistroUsuario.css';
 
 const RegistroUsuario = () => {
   const navigate = useNavigate(); // Inicializa navigate
+  const { state, dispatch } = useContext(AuthContext);
 
   const [form, setForm] = useState({
     nombreUsuario: '',
@@ -15,6 +18,35 @@ const RegistroUsuario = () => {
 
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Redirigir automáticamente al usuario autenticado si hay un token válido en sessionStorage
+  useEffect(() => {
+    const token = sessionStorage.getItem('token');
+    if (token) {
+      try {
+        const decodedToken = jwtDecode(token);
+
+        // Verificar si el token ha expirado
+        if (decodedToken.exp * 1000 > Date.now()) {
+          dispatch({
+            type: 'login',
+            payload: {
+              token,
+              role: decodedToken.role,
+              email: decodedToken.sub,
+            },
+          });
+          navigate('/inicio', { replace: true });
+        } else {
+          // Si el token ha expirado, se remueve de sessionStorage
+          sessionStorage.removeItem('token');
+        }
+      } catch (error) {
+        console.error('Error al decodificar el token:', error);
+        sessionStorage.removeItem('token');
+      }
+    }
+  }, [dispatch, navigate]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -46,7 +78,7 @@ const RegistroUsuario = () => {
           correo: form.correo,
           carrera: form.carrera,
           contrasena: form.contrasena,
-          rolId: 1
+          rolId: 1,
         }),
       });
 
