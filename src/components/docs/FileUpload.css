@@ -73,4 +73,16 @@
     margin-bottom: 20px;
     font-family: 'Arial', sans-serif;
   }
+  .success-container {
+    text-align: center;
+  }
+  .icon-success {
+    font-size: 2rem;
+    color: green;
+    margin-top: 10px;
+  }
+  .uploaded-image {
+    max-width: 100px;
+    margin-top: 10px;
+  }
   

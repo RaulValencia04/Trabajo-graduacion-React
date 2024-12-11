@@ -1,64 +1,71 @@
-import React from "react";
+import React, { useContext,  } from "react";
 import {
   BrowserRouter as Router,
   Route,
   Routes,
-  useLocation,
   Navigate,
+  useLocation,
 } from "react-router-dom";
+import { AuthProvider, AuthContext } from "./Auth/Context/AutProvider";
+import PrivateRoute from "./Auth/Context/PrivateRoute";
+import PublicRoute from "./Auth/Context/PublicRoute";
+
+// Component imports
 import Login from "./Auth/Login";
-import Proyectos from "./Proyectos";
+import RegistroUsuario from "./Registro/RegistroUsuario";
 import Sidebar from "./SideBar/Sidebar";
-import UploadProject from "./docs/UploadProject";
-import Entregas from "./Entregas/Entregas";
 import Dashboard from "./Dashboard/Dashboard";
+import Entregas from "./Entregas/Entregas";
 import Usuario from "./usuario/Usuario";
 import FormularioCrearUsuario from "./usuario/FormularioCrearUsuario";
-import "./App.css";
-import PropuestasSinAprobar from "./AprobarPropuesta/PropuestasSinAprobar";
+import PropuestasSinAprobar from "./DecanataComponents/AprobarPropuesta/PropuestasSinAprobar";
 import ProyectosAceptados from "./ProyectosAceptados/ProyectosAceptados";
 import AuditoriaList from "./AuditoriaList/AuditoriaList";
-import AlumnosActivos from "./AlumnosActivos/AlumnosActivos";
-import DetalleAlumno from "./DetalleAlumno/DetalleAlumno";
+import AlumnosActivos from "./DecanataComponents/AlumnosActivos/AlumnosActivos";
 import EntregasAprobadas from "./EntregasAprobadas/EntregasAprobadas";
-import RegistroUsuario from "./Registro/RegistroUsuario";
-import PrivateRoute from "./Auth/Context/PrivateRoute";
-import { AuthProvider } from "./Auth/Context/AutProvider";
-import PublicRoute from "./Auth/Context/PublicRoute";
-import { AuthContext } from "./Auth/Context/AuthContext";
-import { useContext } from 'react';
+import FormulariosPasantia from "./FormulariosPropuestas/FormulariosPasantia";
+import "./App.css";
+import AsignacionEmpresa from "./FormulariosPropuestas/AsignacionEmpresa";
+import { SelectPropuestas } from "./FormulariosPropuestas/SelectPropuestas";
+import FormulariosProyecto from "./FormulariosPropuestas/FormulariosProyecto";
+import FormulariosInvestigacion from "./FormulariosPropuestas/FormulariosInvestigacion";
+import TrabajoContainer from "./DecanataComponents/DetallesTrabajoGraduacion/TrabajoContainer";
 
 function App() {
   const { state } = useContext(AuthContext);
   const location = useLocation();
-  const isAuthPage = location.pathname === "/login" || location.pathname === "/registro";
-  const role = state.role;
+  const isAuthPage = ["/login", "/registro"].includes(location.pathname);
 
   return (
     <div className="app-container">
+      {/* Show Sidebar only if not on auth pages */}
       {!isAuthPage && <Sidebar />}
 
       <div className={`main-content ${!isAuthPage ? "content-shift" : ""}`}>
         <Routes>
-          {/* Rutas públicas */}
+          {/* Public Routes */}
           <Route
             path="/login"
             element={
-              state.logged ? <Navigate to="/inicio" replace /> : <Login />
+              <PublicRoute>
+                {state.logged ? <Navigate to="/inicio" replace /> : <Login />}
+              </PublicRoute>
             }
           />
           <Route
             path="/registro"
             element={
-              state.logged ? (
-                <Navigate to="/inicio" replace />
-              ) : (
-                <RegistroUsuario />
-              )
+              <PublicRoute>
+                {state.logged ? (
+                  <Navigate to="/inicio" replace />
+                ) : (
+                  <RegistroUsuario />
+                )}
+              </PublicRoute>
             }
           />
 
-          {/* Rutas privadas con roles específicos */}
+          {/* Private Routes */}
           <Route
             path="/inicio"
             element={
@@ -68,18 +75,69 @@ function App() {
             }
           />
           <Route
-            path="/proyectos"
+            path="/opciones_proyecto"
             element={
-              <PrivateRoute allowedRoles={["Estudiante", "Decano", "Asesor"]}>
-                <Proyectos />
+              <PrivateRoute allowedRoles={["Estudiante"]}>
+                <FormulariosPasantia />
               </PrivateRoute>
             }
           />
           <Route
+            path="/formulario_pasantia"
+            element={
+              <PrivateRoute allowedRoles={["Estudiante"]}>
+                <FormulariosPasantia />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/formulario_empresa"
+            element={
+              <PrivateRoute allowedRoles={["Estudiante"]}>
+                <AsignacionEmpresa />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/formulario_proyecto"
+            element={
+              <PrivateRoute allowedRoles={["Estudiante"]}>
+                <FormulariosProyecto />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/formulario_investigacion"
+            element={
+              <PrivateRoute allowedRoles={["Estudiante"]}>
+                <FormulariosInvestigacion />
+              </PrivateRoute>
+            }
+          />
+
+          <Route
+            path="/aprobar-propuesta"
+            element={
+              <PrivateRoute allowedRoles={["Decano"]}>
+                <PropuestasSinAprobar />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/detalle_propuesta/:id"
+            element={
+              <PrivateRoute allowedRoles={["Decano"]}>
+                <TrabajoContainer />
+              </PrivateRoute>
+            }
+          />
+          {/* por hacer */}
+
+          <Route
             path="/propuestas"
             element={
               <PrivateRoute allowedRoles={["Decano", "Asesor"]}>
-                <UploadProject />
+                <SelectPropuestas />
               </PrivateRoute>
             }
           />
@@ -107,14 +165,7 @@ function App() {
               </PrivateRoute>
             }
           />
-          <Route
-            path="/aprobar-propuesta"
-            element={
-              <PrivateRoute allowedRoles={["Decano"]}>
-                <PropuestasSinAprobar />
-              </PrivateRoute>
-            }
-          />
+
           <Route
             path="/propuesta-aprobadas"
             element={
@@ -139,14 +190,7 @@ function App() {
               </PrivateRoute>
             }
           />
-          <Route
-            path="/detalles-alumno/:alumnoId"
-            element={
-              <PrivateRoute allowedRoles={["Decano", "Asesor"]}>
-                <DetalleAlumno />
-              </PrivateRoute>
-            }
-          />
+
           <Route
             path="/entregas-aprobadas"
             element={
@@ -156,13 +200,13 @@ function App() {
             }
           />
 
-          {/* Ruta de acceso denegado */}
+          {/* Access Denied Route */}
           <Route
             path="/no-autorizado"
             element={<div>No tienes autorización para ver esta página.</div>}
           />
 
-          {/* Ruta por defecto */}
+          {/* Default Redirect */}
           <Route path="*" element={<Navigate to="/inicio" />} />
         </Routes>
       </div>

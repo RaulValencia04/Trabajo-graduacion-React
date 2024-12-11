@@ -7,6 +7,7 @@ export const authReducer = (state, action) => {
                 token: action.payload.token,
                 role: action.payload.role,
                 email: action.payload.email,
+                userId: action.payload.userId, // Agregar userId al estado
             };
         case 'logout':
             return {
@@ -14,6 +15,7 @@ export const authReducer = (state, action) => {
                 token: null,
                 role: null,
                 email: null,
+                userId: null, // Reiniciar userId
             };
         default:
             return state;

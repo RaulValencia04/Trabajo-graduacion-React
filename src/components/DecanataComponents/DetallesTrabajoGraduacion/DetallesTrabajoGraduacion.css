@@ -1,0 +1,83 @@
+/* Contenedor General */
+.document-wrapper {
+    max-width: 900px;
+    margin: 2rem auto;
+    padding: 2rem;
+    background-color: #f9f9f9;
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    font-family: 'Arial', sans-serif;
+    color: #333;
+    line-height: 1.6;
+  }
+  
+  /* Encabezado */
+  .document-header {
+    text-align: center;
+    margin-bottom: 2rem;
+  }
+  
+  .document-header h1 {
+    font-size: 2.2rem;
+    color: #f9b905;
+    margin-bottom: 0.5rem;
+  }
+  
+  .document-header p {
+    font-size: 1.2rem;
+    color: #888;
+  }
+  
+  /* Secciones */
+  .document-content {
+    padding: 1rem 0;
+  }
+  
+  .document-section {
+    margin-bottom: 2rem;
+    padding: 1rem;
+    background-color: #ffffff;
+    border-left: 5px solid #f9b905;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  }
+  
+  .document-section h2 {
+    font-size: 1.8rem;
+    color: #f9b905;
+    margin-bottom: 1rem;
+  }
+  
+  .document-section p {
+    margin: 0.5rem 0;
+    color: #555;
+    font-size: 1rem;
+  }
+  
+  .document-section strong {
+    color: #333;
+  }
+  
+  /* Lista de Miembros */
+  ul {
+    list-style-type: none;
+    padding-left: 0;
+  }
+  
+  li {
+    font-size: 1rem;
+    margin-bottom: 0.5rem;
+    /* background-color: #eef6fc; */
+    padding: 0.5rem;
+    border-radius: 6px;
+    color: #333;
+  }
+
+  
+  .evaluar{
+    margin-bottom: 2.5rem;
+    /* position:fixed; */
+  }
+  /* Botones o enlaces (opcional) */
+
+  

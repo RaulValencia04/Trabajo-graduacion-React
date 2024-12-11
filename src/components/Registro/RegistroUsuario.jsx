@@ -68,7 +68,7 @@ const RegistroUsuario = () => {
     setIsSubmitting(true);
 
     try {
-      const response = await fetch('http://localhost:8080/auth/registro', { // Cambia la URL según tu configuración
+      const response = await fetch('http://localhost:8080/auth/registro', { 
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

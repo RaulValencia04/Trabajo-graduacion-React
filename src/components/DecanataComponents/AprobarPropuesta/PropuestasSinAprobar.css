@@ -1,0 +1,74 @@
+.container {
+  margin: 20px auto;
+  padding: 20px;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #fdfcfb 0%, #e2d1c3 100%);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  max-width: 95%;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.title {
+  text-align: center;
+  color: #5e4e4a;
+  margin-bottom: 20px;
+  font-size: 24px;
+  font-weight: 600;
+}
+
+.tabla-propuestas {
+  width: 100%;
+  border-collapse: collapse;
+  overflow: hidden;
+  border-radius: 8px;
+  margin-top: 20px;
+  background-color: #fff;
+}
+
+.tabla-propuestas thead {
+  background-color: #d9c1a9;
+}
+
+.tabla-propuestas th, .tabla-propuestas td {
+  padding: 12px;
+  text-align: center;
+  border-bottom: 1px solid #ddd;
+  font-size: 14px;
+}
+
+.tabla-propuestas th {
+  color: #333;
+  font-weight: bold;
+}
+
+.tabla-propuestas tbody tr:hover {
+  background-color: #f5f1ed;
+}
+
+.btn-ver-detalle {
+  background-color: #8aa7a9; 
+  color: #fff;
+  border: none;
+  padding: 8px 16px;
+  margin: 5px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  font-size: 14px;
+}
+
+.btn-ver-detalle:hover {
+  background-color: #6c8b8e; 
+}
+
+/* Opcional: Ajustes de respuesta para pantallas más pequeñas */
+@media (max-width: 768px) {
+  .tabla-propuestas th, .tabla-propuestas td {
+    font-size: 12px;
+    padding: 8px;
+  }
+
+  .title {
+    font-size: 20px;
+  }
+}

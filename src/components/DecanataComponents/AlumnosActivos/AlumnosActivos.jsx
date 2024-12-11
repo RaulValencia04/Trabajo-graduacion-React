@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { FaEdit, FaTrash, FaUserCog } from 'react-icons/fa';
 import './AlumnosActivos.css';
 
 const AlumnosActivos = () => {
@@ -15,7 +16,7 @@ const AlumnosActivos = () => {
       fetch('http://localhost:8080/api/usuarios/getAll', {
         method: 'GET',
         headers: {
-          'Authorization': `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
       })
@@ -43,13 +44,13 @@ const AlumnosActivos = () => {
     fetch(`http://localhost:8080/api/usuarios/${alumnoId}`, {
       method: 'DELETE',
       headers: {
-        'Authorization': `Bearer ${token}`,
+        Authorization: `Bearer ${token}`,
         'Content-Type': 'application/json',
       },
     })
       .then((response) => {
         if (response.ok) {
-          setAlumnosData(alumnosData.filter(alumno => alumno.id !== alumnoId));
+          setAlumnosData(alumnosData.filter((alumno) => alumno.id !== alumnoId));
         } else {
           throw new Error('Error al eliminar el alumno');
         }
@@ -68,16 +69,19 @@ const AlumnosActivos = () => {
   };
 
   if (loading) {
-    return <p>Cargando datos...</p>;
+    return <p className="loading-message">Cargando datos, por favor espere...</p>;
   }
 
   if (error) {
-    return <p>Error: {error}</p>;
+    return <p className="error-message">Error: {error}</p>;
   }
 
   return (
     <div className="table-container">
-      <h2 className="table-title">Alumnos Activos y sus Detalles</h2>
+      <h2 className="table-title">Gestión de Usuarios Activos</h2>
+      <p className="table-description">
+        Administra los datos de los Usuarios activos y realiza acciones con un clic.
+      </p>
       <table className="alumno-proyectos-table">
         <thead>
           <tr>
@@ -98,25 +102,29 @@ const AlumnosActivos = () => {
               <td>{alumno.facultad}</td>
               <td>{alumno.rol.nombre}</td>
               <td>
-               
-                <button 
-                  className="btn-actualizar" 
-                  onClick={() => handleUpdate(alumno.id)}
-                >
-                  Actualizar
-                </button>
-                <button 
-                  className="btn-actualizar-rol" 
-                  onClick={() => handleUpdateRole(alumno.id)}
-                >
-                  Actualizar Rol
-                </button>
-                <button 
-                  className="btn-borrar" 
-                  onClick={() => handleDelete(alumno.id)}
-                >
-                  Borrar
-                </button>
+                <div className="actions-menu">
+                  <button
+                    className="action-button"
+                    title="Actualizar Información"
+                    onClick={() => handleUpdate(alumno.id)}
+                  >
+                    <FaEdit />
+                  </button>
+                  <button
+                    className="action-button"
+                    title="Actualizar Rol"
+                    onClick={() => handleUpdateRole(alumno.id)}
+                  >
+                    <FaUserCog />
+                  </button>
+                  <button
+                    className="action-button danger"
+                    title="Eliminar Alumno"
+                    onClick={() => handleDelete(alumno.id)}
+                  >
+                    <FaTrash />
+                  </button>
+                </div>
               </td>
             </tr>
           ))}

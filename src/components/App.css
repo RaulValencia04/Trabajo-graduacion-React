@@ -1,6 +1,7 @@
 .app-container {
   display: flex;
   height: 100vh;
+  width: 100%;
 }
 
 .sidebar {
@@ -18,6 +19,7 @@
 
 .content-shift {
   margin-left: 250px; /* Debe coincidir con el ancho de la barra lateral */
+  width: 100%;
 }
 h1{
   font-size:3rem;
