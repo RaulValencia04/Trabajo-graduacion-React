@@ -4,6 +4,7 @@ import { FaEdit, FaTrash, FaUserCog } from 'react-icons/fa';
 import './AlumnosActivos.css';
 
 const AlumnosActivos = () => {
+  const API_URL = process.env.REACT_APP_API_URL;
   const [alumnosData, setAlumnosData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -41,7 +42,7 @@ const AlumnosActivos = () => {
   }, [token]);
 
   const handleDelete = (alumnoId) => {
-    fetch(`http://localhost:8080/api/usuarios/${alumnoId}`, {
+    fetch(`${API_URL}/api/usuarios/${alumnoId}`, {
       method: 'DELETE',
       headers: {
         Authorization: `Bearer ${token}`,

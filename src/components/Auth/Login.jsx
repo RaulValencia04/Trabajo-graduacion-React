@@ -5,6 +5,7 @@ import { AuthContext } from './Context/AuthContext';
 import './Login.css';
 
 const Login = () => {
+    const API_URL = process.env.REACT_APP_API_URL;
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
@@ -45,7 +46,7 @@ const Login = () => {
         e.preventDefault();
     
         try {
-            const response = await fetch('http://localhost:8080/auth/login', {
+            const response = await fetch(`${API_URL}/auth/login`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

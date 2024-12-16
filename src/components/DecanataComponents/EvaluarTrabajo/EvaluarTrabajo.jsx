@@ -5,31 +5,35 @@ import { AuthContext } from "../../Auth/Context/AuthContext";
 
 const EvaluarTrabajo = ({ trabajoId }) => {
   const API_URL = process.env.REACT_APP_API_URL;
+
   const [query, setQuery] = useState("");
   const [debouncedQuery] = useDebounce(query, 300);
   const [usuarios, setUsuarios] = useState([]);
   const [asesorSeleccionado, setAsesorSeleccionado] = useState(null);
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+
   const [modalOpen, setModalOpen] = useState(false);
-  const [decision, setDecision] = useState(false); 
-  const [comentarios, setComentarios] = useState(""); 
+  const [decision, setDecision] = useState(false); // false => Rechazar, true => Aprobar
+  const [comentarios, setComentarios] = useState("");
 
   const { state } = useContext(AuthContext);
-  const { token, userId } = state;
+  const { token, userId, role } = state; // Role puede ser 'decano' o 'asesor'
   const evaluadoPorId = userId;
+
   useEffect(() => {
     if (!trabajoId) {
-      console.log("trabajoId no está definido.");
+      console.warn("trabajoId no está definido.");
     }
   }, [trabajoId]);
 
+  // Llamada a la API para buscar asesores (solo para decano)
   const buscarUsuarios = async () => {
     if (!debouncedQuery.trim()) {
       setUsuarios([]);
       return;
     }
-  
 
     setLoading(true);
     setError(null);
@@ -45,19 +49,21 @@ const EvaluarTrabajo = ({ trabajoId }) => {
           },
         }
       );
-
       if (!response.ok) throw new Error("Error al buscar usuarios");
+
       const data = await response.json();
       setUsuarios(data);
     } catch (error) {
-      setError("Error al buscar usuarios. Por favor, intenta de nuevo.");
+      setError("Error al buscar asesores. Por favor, intenta de nuevo.");
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    buscarUsuarios();
+    if (role === "decano") {
+      buscarUsuarios();
+    }
   }, [debouncedQuery]);
 
   const toggleModal = () => {
@@ -65,8 +71,12 @@ const EvaluarTrabajo = ({ trabajoId }) => {
   };
 
   const handleEnviar = async () => {
+    if (role === "decano" && decision && !asesorSeleccionado) {
+      alert("Debes seleccionar un asesor antes de aprobar la propuesta.");
+      return;
+    }
+
     try {
-     
       const actualizarResponse = await fetch(
         `${API_URL}/api/trabajos/${trabajoId}/actualizar`,
         {
@@ -76,7 +86,7 @@ const EvaluarTrabajo = ({ trabajoId }) => {
             Authorization: `Bearer ${token}`,
           },
           body: JSON.stringify({
-            estado: decision ? "En Progreso" : "Rechazado", 
+            estado: decision ? "En Progreso" : "Rechazado",
             comentarios,
             evaluadoPorId,
           }),
@@ -87,19 +97,23 @@ const EvaluarTrabajo = ({ trabajoId }) => {
         throw new Error("Error al actualizar el trabajo");
       }
 
-      if (decision && asesorSeleccionado) {
-        
-
-        console.log(trabajoId);
-        const asignarResponse = await fetch(`${API_URL}/api/asignaciones?trabajoId=${trabajoId}&asesorId=${asesorSeleccionado.id}`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-        });
+      if (role === "decano" && decision && asesorSeleccionado) {
+        const asignarResponse = await fetch(
+          `${API_URL}/api/asignaciones?trabajoId=${trabajoId}&asesorId=${asesorSeleccionado.id}`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
 
         if (!asignarResponse.ok) {
+          const errorData = await asignarResponse.json();
+          if (errorData.message) {
+            throw new Error(errorData.message);
+          }
           throw new Error("Error al asignar el asesor");
         }
       }
@@ -110,8 +124,12 @@ const EvaluarTrabajo = ({ trabajoId }) => {
       setComentarios("");
       setAsesorSeleccionado(null);
     } catch (error) {
-      alert("Error al enviar la evaluación: " + error.message);
+      alert(error.message);
     }
+  };
+
+  const handleQuitarAsesor = () => {
+    setAsesorSeleccionado(null);
   };
 
   return (
@@ -134,11 +152,11 @@ const EvaluarTrabajo = ({ trabajoId }) => {
         </div>
       </div>
 
-      {/* Modal de Evaluación */}
       {modalOpen && (
         <div className="modal">
           <div className="modal-content animate-modal">
             <h3>Evaluar Propuesta</h3>
+
             <textarea
               rows="5"
               placeholder="Escribe tus comentarios aquí..."
@@ -147,7 +165,6 @@ const EvaluarTrabajo = ({ trabajoId }) => {
               onChange={(e) => setComentarios(e.target.value)}
             ></textarea>
 
-            {/* Switch para aprobar/rechazar */}
             <div className="switch-container">
               <span>Rechazar</span>
               <label className="switch">
@@ -161,25 +178,15 @@ const EvaluarTrabajo = ({ trabajoId }) => {
               <span>Aprobar</span>
             </div>
 
-            {/* Indicador visual para asesor seleccionado */}
-            {asesorSeleccionado && (
-              <div className="selected-asesor">
-                <h4>Asesor Seleccionado:</h4>
-                <p>
-                  <strong>Nombre:</strong> {asesorSeleccionado.nombreUsuario}
-                </p>
-                <p>
-                  <strong>Correo:</strong> {asesorSeleccionado.correo}
-                </p>
-              </div>
-            )}
-
-            {/* Buscador de asesor solo si se aprueba */}
-            {decision && (
+            {role === "decano" && decision && (
               <div className="search-container">
+                <label htmlFor="searchAsesor" className="search-label">
+                  Buscar Asesor:
+                </label>
                 <input
                   type="text"
-                  placeholder="Buscar asesor..."
+                  id="searchAsesor"
+                  placeholder="Escribe para buscar asesores..."
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
                   className="search-input"
@@ -216,10 +223,7 @@ const EvaluarTrabajo = ({ trabajoId }) => {
               >
                 Enviar
               </button>
-              <button
-                className="action-button btn-danger"
-                onClick={toggleModal}
-              >
+              <button className="action-button btn-danger" onClick={toggleModal}>
                 Cancelar
               </button>
             </div>

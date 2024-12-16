@@ -1,29 +1,42 @@
 import React, { useState, useContext, useEffect } from "react";
 import { useDropzone } from "react-dropzone";
-import { AuthContext } from "../Auth/Context/AuthContext"; // Asegúrate de importar correctamente tu contexto
+import { AuthContext } from "../Auth/Context/AuthContext";
 import "./FileUpload.css";
 
 const FileUpload = ({ onSuccess, fileName, initialUploaded = false }) => {
-  const { state } = useContext(AuthContext); // Extraer datos del contexto de autenticación
-  const { userId, token } = state; // Obtener el `userId` y `token` del estado global
+  const API_URL = process.env.REACT_APP_API_URL;
+  const { state } = useContext(AuthContext);
+  const { userId, token } = state;
 
-  const [isUploaded, setIsUploaded] = useState(initialUploaded); // Estado inicial persistente
-  const [filePreview, setFilePreview] = useState(null); // Previsualización del archivo
-  const [uploadedFilePath, setUploadedFilePath] = useState(null); // Ruta del archivo subido
+  const [isUploaded, setIsUploaded] = useState(initialUploaded);
+  const [filePreview, setFilePreview] = useState(null);
+  const [uploadedFilePath, setUploadedFilePath] = useState(null);
+  const [selectedFile, setSelectedFile] = useState(null);
 
-  // Sincronizar `initialUploaded` con el estado local al montar
   useEffect(() => {
     setIsUploaded(initialUploaded);
   }, [initialUploaded]);
 
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+  // Configuración de React Dropzone
+  const {
+    getRootProps,
+    getInputProps,
+    isDragActive,
+    acceptedFiles,
+  } = useDropzone({
+    multiple: false,        // Sólo un archivo
+    accept: {
+      // Ejemplo: sólo imágenes; ajusta el MIME tipo según tu necesidad
+      'image/*': []
+    },
     onDrop: (acceptedFiles) => {
       const file = acceptedFiles[0];
       if (file) {
         setFilePreview(URL.createObjectURL(file));
+        setSelectedFile(file);
       }
     },
-    disabled: isUploaded, // Deshabilitar si el archivo ya fue subido
+    disabled: isUploaded,
   });
 
   const uploadFile = async (file) => {
@@ -34,13 +47,13 @@ const FileUpload = ({ onSuccess, fileName, initialUploaded = false }) => {
 
     const formData = new FormData();
     formData.append("file", file);
-    formData.append("subidoPorId", userId); // Agregar el userId al FormData
+    formData.append("subidoPorId", userId);
 
     try {
-      const response = await fetch("http://localhost:8080/api/documentos/upload", {
+      const response = await fetch(`${API_URL}/api/documentos/upload`, {
         method: "POST",
         headers: {
-          Authorization: `Bearer ${token}`, // Agregar el token de autorización
+          Authorization: `Bearer ${token}`,
         },
         body: formData,
       });
@@ -55,7 +68,7 @@ const FileUpload = ({ onSuccess, fileName, initialUploaded = false }) => {
       setUploadedFilePath(rutaArchivo);
 
       if (onSuccess) {
-        onSuccess(rutaArchivo); // Propagar la ruta al componente padre
+        onSuccess(rutaArchivo);
       }
     } catch (error) {
       console.error("Error al subir el archivo:", error.message);
@@ -63,9 +76,8 @@ const FileUpload = ({ onSuccess, fileName, initialUploaded = false }) => {
   };
 
   const handleUpload = () => {
-    const inputFile = document.getElementById(`file-input-${fileName}`);
-    if (inputFile?.files[0]) {
-      uploadFile(inputFile.files[0]);
+    if (selectedFile) {
+      uploadFile(selectedFile);
     } else {
       console.error("No se seleccionó ningún archivo");
     }
@@ -81,14 +93,21 @@ const FileUpload = ({ onSuccess, fileName, initialUploaded = false }) => {
         </div>
       ) : (
         <div>
-          <div {...getRootProps({ className: "dropzone" })}>
+          {/* Dropzone */}
+          <div
+            {...getRootProps({
+              className: `dropzone ${isDragActive ? "isDragActive" : ""}`,
+            })}
+          >
             <input {...getInputProps()} id={`file-input-${fileName}`} />
             {isDragActive ? (
-              <p>Suelta los archivos aquí...</p>
+              <p>Suelta el archivo aquí...</p>
             ) : (
               <p>Arrastra y suelta un archivo, o haz clic para seleccionar</p>
             )}
           </div>
+
+          {/* Previsualización */}
           {filePreview && (
             <div className="file-preview">
               <p>Archivo seleccionado:</p>
@@ -99,9 +118,13 @@ const FileUpload = ({ onSuccess, fileName, initialUploaded = false }) => {
               />
             </div>
           )}
-          <button type="button" onClick={handleUpload}>
-            Subir archivo
-          </button>
+
+          {/* Botón de subir, solo visible si hay un archivo seleccionado */}
+          {selectedFile && (
+            <button type="button" onClick={handleUpload}>
+              Subir archivo
+            </button>
+          )}
         </div>
       )}
     </div>

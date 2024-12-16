@@ -1,88 +1,98 @@
 .dropzone {
-    border: 2px dashed #edc542;
-    border-radius: 5px;
-    padding: 20px;
-    text-align: center;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-    margin: 20px auto; /* Añade margen a la dropzone */
-    max-width: 700px; /* Establece un ancho máximo */
-  }
-  
-  .dropzone p {
-    color: #333;
-    font-size: 16px;
-  }
-  
-  .dropzone:hover {
-    background-color: #f1f1f1;
-  }
-  
-  .dropzone.isDragActive {
-    background-color: #e0e0e0;
-  }
-  
-  input[type="text"] {
-    width: 100%;
-    padding: 10px;
-    margin: 10px 0; /* Añade margen superior e inferior */
-    box-sizing: border-box;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-  }
-  
-  button[type="submit"] {
-    background-color: #edc542;
-    color: white;
-    padding: 10px 20px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-    display: block;
-    margin: 20px auto; /* Centra el botón */
-  }
-  
-  button[type="submit"]:hover {
-    background-color: #0056b3;
-  }
-  
-  .file-preview {
-    margin-top: 20px;
-    text-align: center; /* Centra la previsualización del archivo */
-  }
-  
-  .preview-image {
-    max-width: 100%;
-    max-height: 200px;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    padding: 10px;
-    background-color: #f9f9f9;
-    margin: 0 auto; /* Centra la imagen dentro de la previsualización */
-    display: block;
-  }
-  
-  .input-f {
-    margin: 10px auto; /* Centra los inputs */
-    max-width: 500px; /* Establece un ancho máximo */
-  }
-  .title {
-    text-align: center;
-    color: #7a5c61; /* Pastel purple */
-    margin-bottom: 20px;
-    font-family: 'Arial', sans-serif;
-  }
-  .success-container {
-    text-align: center;
-  }
-  .icon-success {
-    font-size: 2rem;
-    color: green;
-    margin-top: 10px;
-  }
-  .uploaded-image {
-    max-width: 100px;
-    margin-top: 10px;
-  }
-  
+  border: 2px dashed #edc542;
+  border-radius: 5px;
+  padding: 20px;
+  text-align: center;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  margin: 20px auto; /* Añade margen a la dropzone */
+  max-width: 700px; /* Establece un ancho máximo */
+}
+
+.dropzone p {
+  color: #333;
+  font-size: 16px;
+}
+
+.dropzone:hover {
+  background-color: #f1f1f1;
+}
+
+/* Color especial al arrastrar */
+.dropzone.isDragActive {
+  background-color: #fff3c4; /* Un amarillo claro */
+}
+
+/* Previsualización de archivo */
+.file-preview {
+  margin-top: 20px;
+  text-align: center; /* Centra la previsualización */
+}
+
+.preview-image {
+  max-width: 100%;
+  max-height: 200px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  padding: 10px;
+  background-color: #f9f9f9;
+  margin: 0 auto; /* Centra la imagen */
+  display: block;
+}
+
+/* Botones */
+button[type="button"] {
+  background-color: #edc542;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  display: block;
+  margin: 20px auto; /* Centra el botón */
+}
+
+button[type="button"]:hover {
+  background-color: #0056b3;
+}
+
+/* Inputs de texto (si los usas) */
+input[type="text"] {
+  width: 100%;
+  padding: 10px;
+  margin: 10px 0; /* Añade margen superior e inferior */
+  box-sizing: border-box;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+/* Contenedor de éxito */
+.success-container {
+  text-align: center;
+}
+
+.icon-success {
+  font-size: 2rem;
+  color: green;
+  margin-top: 10px;
+}
+
+/* Imagen ya subida */
+.uploaded-image {
+  max-width: 100px;
+  margin-top: 10px;
+}
+
+/* Clases auxiliares */
+.input-f {
+  margin: 10px auto; /* Centra los inputs */
+  max-width: 500px;  /* Establece un ancho máximo */
+}
+
+.title {
+  text-align: center;
+  color: #7a5c61; 
+  margin-bottom: 20px;
+  font-family: 'Arial', sans-serif;
+}

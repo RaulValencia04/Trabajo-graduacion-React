@@ -41,8 +41,8 @@ const PropuestasSinAprobar = () => {
     return text;
   };
 
-  const handleVerPropuesta = (id) => {
-    navigate(`/detalle_propuesta/${id}`);
+  const handleVerPropuesta = (id, tipoTrabajo) => {
+    navigate(`/detalle_propuesta/${id}?q=${tipoTrabajo}`);
   };
 
   return (
@@ -72,7 +72,7 @@ const PropuestasSinAprobar = () => {
               <td>
                 <button 
                   className='btn-ver-detalle' 
-                  onClick={() => handleVerPropuesta(propuesta.id)}
+                  onClick={() => handleVerPropuesta(propuesta.id, propuesta.tipoTrabajo)}
                 >
                   Ver propuesta completa
                 </button>

@@ -7,6 +7,7 @@ import './RegistroUsuario.css';
 const RegistroUsuario = () => {
   const navigate = useNavigate(); // Inicializa navigate
   const { state, dispatch } = useContext(AuthContext);
+  const API_URL = process.env.REACT_APP_API_URL;
 
   const [form, setForm] = useState({
     nombreUsuario: '',
@@ -68,7 +69,7 @@ const RegistroUsuario = () => {
     setIsSubmitting(true);
 
     try {
-      const response = await fetch('http://localhost:8080/auth/registro', { 
+      const response = await fetch(`${API_URL}/auth/registro`, { 
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

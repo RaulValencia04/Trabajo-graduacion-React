@@ -27,7 +27,7 @@ const Sidebar = () => {
 
     const asesorLinks = [
         { to: '/inicio', icon: 'fas fa-home', text: 'PÁGINA DE INICIO' },
-        { to: '/alumnos-activos', icon: 'fas fa-users', text: 'VER LISTADO DE ALUMNOS' },
+        { to: '/peticiones_asesoria', icon: 'fas fa-users', text: 'VER SOLICITUDES' },
         { to: '/entregas-aprobadas', icon: 'fas fa-upload', text: 'SUBIR INFORME A DECANATO' },
     ];
 

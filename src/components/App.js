@@ -30,6 +30,8 @@ import { SelectPropuestas } from "./FormulariosPropuestas/SelectPropuestas";
 import FormulariosProyecto from "./FormulariosPropuestas/FormulariosProyecto";
 import FormulariosInvestigacion from "./FormulariosPropuestas/FormulariosInvestigacion";
 import TrabajoContainer from "./DecanataComponents/DetallesTrabajoGraduacion/TrabajoContainer";
+import PropuestasAsesoria from "./AsesorComponents/PropuestasAsesoria/PropuestasAsesoria";
+
 
 function App() {
   const { state } = useContext(AuthContext);
@@ -128,6 +130,14 @@ function App() {
             element={
               <PrivateRoute allowedRoles={["Decano"]}>
                 <TrabajoContainer />
+              </PrivateRoute>
+            }
+          />
+            <Route
+            path="/peticiones_asesoria"
+            element={
+              <PrivateRoute allowedRoles={["Asesor"]}>
+                <PropuestasAsesoria />
               </PrivateRoute>
             }
           />

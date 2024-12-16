@@ -1,8 +1,9 @@
-import React from 'react';
-import './DetallesTrabajoGraduacion.css';
-import EvaluarTrabajo from "../EvaluarTrabajo/EvaluarTrabajo"
+import React from "react";
+import "./DetallesTrabajoGraduacion.css";
+import EvaluarTrabajo from "../EvaluarTrabajo/EvaluarTrabajo";
 
 const DetallesProyectoOInvestigacion = ({ trabajo }) => {
+  const API_URL = process.env.REACT_APP_API_URL;
   const {
     id,
     titulo,
@@ -23,10 +24,10 @@ const DetallesProyectoOInvestigacion = ({ trabajo }) => {
     constanciaServicioSocial,
     cartaAceptacion,
     estado,
-    fechaCreacion
+    fechaCreacion,
   } = trabajo;
 
-  // Parsear campos JSON que son strings (si existen)
+  
   let parsedActores = [];
   let parsedObjetivos = [];
   let parsedAsesores = [];
@@ -53,14 +54,14 @@ const DetallesProyectoOInvestigacion = ({ trabajo }) => {
     <div className="document-wrapper">
       <div className="document-header">
         <h1>{titulo}</h1>
-        <p>{tipoTrabajo === 'Proyecto' ? 'Proyecto' : 'Investigación'}</p>
+        <p>{tipoTrabajo === "Proyecto" ? "Proyecto" : "Investigación"}</p>
       </div>
 
       <div className="document-content">
         {/* Sección 1: Información del alumno y asesores propuestos */}
 
         <div className="evaluar">
-            <EvaluarTrabajo trabajoId={id}/>
+          <EvaluarTrabajo trabajoId={id} />
         </div>
         <section className="document-section">
           <h2>Datos del Alumno y Asesores Propuestos</h2>
@@ -91,19 +92,36 @@ const DetallesProyectoOInvestigacion = ({ trabajo }) => {
         {/* Sección 3: Detalles del trabajo (Tipo, Fechas, Estado) */}
         <section className="document-section">
           <h2>Detalles del Trabajo</h2>
-          <p><strong>Tipo de Trabajo:</strong> {tipoTrabajo}</p>
-          <p><strong>Estado:</strong> {estado}</p>
-          <p><strong>Fecha de Creación:</strong> {fechaCreacion || 'No disponible'}</p>
-          <p><strong>Fecha de Inicio:</strong> {fechaInicio}</p>
-          <p><strong>Fecha de Fin:</strong> {fechaFin}</p>
+          <p>
+            <strong>Tipo de Trabajo:</strong> {tipoTrabajo}
+          </p>
+          <p>
+            <strong>Estado:</strong> {estado}
+          </p>
+          <p>
+            <strong>Fecha de Creación:</strong>{" "}
+            {fechaCreacion || "No disponible"}
+          </p>
+          <p>
+            <strong>Fecha de Inicio:</strong> {fechaInicio}
+          </p>
+          <p>
+            <strong>Fecha de Fin:</strong> {fechaFin}
+          </p>
         </section>
 
         {/* Sección 4: Información específica del Proyecto/Investigación */}
         <section className="document-section">
           <h2>Información del {tipoTrabajo}</h2>
-          <p><strong>Problema:</strong> {problema}</p>
-          <p><strong>Justificación:</strong> {justificacion}</p>
-          <p><strong>Alcance:</strong> {alcance}</p>
+          <p>
+            <strong>Problema:</strong> {problema}
+          </p>
+          <p>
+            <strong>Justificación:</strong> {justificacion}
+          </p>
+          <p>
+            <strong>Alcance:</strong> {alcance}
+          </p>
 
           <h3>Objetivos</h3>
           {parsedObjetivos.length > 0 ? (
@@ -116,7 +134,9 @@ const DetallesProyectoOInvestigacion = ({ trabajo }) => {
             <p>No hay objetivos disponibles.</p>
           )}
 
-          <p><strong>Descripción de Objetivos:</strong> {descripcionObjetivos}</p>
+          <p>
+            <strong>Descripción de Objetivos:</strong> {descripcionObjetivos}
+          </p>
 
           <h3>Actores</h3>
           {parsedActores.length > 0 ? (
@@ -132,12 +152,77 @@ const DetallesProyectoOInvestigacion = ({ trabajo }) => {
 
         {/* Sección 5: Documentos y archivos relacionados */}
         <section className="document-section">
-          <h2>Documentos Relacionados</h2>
-          <p><strong>Inscripción Trabajo Graduación:</strong> {inscripcionTrabajoGraduacion}</p>
-          <p><strong>Certificación Global de Notas:</strong> {certificacionGlobalNotas}</p>
-          <p><strong>Constancia de Servicio Social:</strong> {constanciaServicioSocial}</p>
-          <p><strong>Carta de Aceptación:</strong> {cartaAceptacion ? JSON.stringify(cartaAceptacion) : 'No disponible'}</p>
-        </section>
+      <h2>Documentos Relacionados</h2>
+      <div className="document-container">
+        {/* Inscripción Trabajo de Graduación */}
+        <div className="document-item">
+          <h3>Inscripción Trabajo Graduación</h3>
+          {inscripcionTrabajoGraduacion ? (
+            <img
+              src={`${API_URL}/uploads/${inscripcionTrabajoGraduacion}`}
+              alt="Inscripción Trabajo Graduación"
+              className="document-image"
+              onError={(e) => {
+                e.target.src = "/images/placeholder.png"; // Imagen de reemplazo
+              }}
+            />
+          ) : (
+            <p>No disponible</p>
+          )}
+        </div>
+
+        {/* Certificación Global de Notas */}
+        <div className="document-item">
+          <h3>Certificación Global de Notas</h3>
+          {certificacionGlobalNotas ? (
+            <img
+              src={`${API_URL}/uploads/${certificacionGlobalNotas}`}
+              alt="Certificación Global de Notas"
+              className="document-image"
+              onError={(e) => {
+                e.target.src = "/images/placeholder.png";
+              }}
+            />
+          ) : (
+            <p>No disponible</p>
+          )}
+        </div>
+
+        {/* Constancia de Servicio Social */}
+        <div className="document-item">
+          <h3>Constancia de Servicio Social</h3>
+          {constanciaServicioSocial ? (
+            <img
+              src={`${API_URL}/uploads/${constanciaServicioSocial}`}
+              alt="Constancia de Servicio Social"
+              className="document-image"
+              onError={(e) => {
+                e.target.src = "/images/placeholder.png";
+              }}
+            />
+          ) : (
+            <p>No disponible</p>
+          )}
+        </div>
+
+        {/* Carta de Aceptación */}
+        <div className="document-item">
+          <h3>Carta de Aceptación</h3>
+          {cartaAceptacion && cartaAceptacion[0]?.documento ? (
+            <img
+              src={`${API_URL}/uploads/${cartaAceptacion[0]?.documento}`}
+              alt="Carta de Aceptación"
+              className="document-image"
+              onError={(e) => {
+                e.target.src = "/images/placeholder.png";
+              }}
+            />
+          ) : (
+            <p>No disponible</p>
+          )}
+        </div>
+      </div>
+    </section>
       </div>
     </div>
   );
