@@ -1,20 +1,24 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect,useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FaEdit, FaTrash, FaUserCog } from 'react-icons/fa';
 import './AlumnosActivos.css';
+import { AuthContext } from '../../Auth/Context/AuthContext';
+import {useApi} from "../../Auth/Helpers/api"
 
 const AlumnosActivos = () => {
   const API_URL = process.env.REACT_APP_API_URL;
   const [alumnosData, setAlumnosData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-
+  const { authFetch } = useApi();
   const navigate = useNavigate();
-  const token = sessionStorage.getItem('token');
+  const { state } = useContext(AuthContext);
+  const { token } = state;
+ 
 
   useEffect(() => {
     if (token) {
-      fetch('http://localhost:8080/api/usuarios/getAll', {
+      authFetch(`${API_URL}/api/usuarios/getAll`, {
         method: 'GET',
         headers: {
           Authorization: `Bearer ${token}`,
@@ -39,10 +43,10 @@ const AlumnosActivos = () => {
       setError('Token no encontrado. Por favor, inicie sesión.');
       setLoading(false);
     }
-  }, [token]);
+  }, [token,API_URL,authFetch]);
 
   const handleDelete = (alumnoId) => {
-    fetch(`${API_URL}/api/usuarios/${alumnoId}`, {
+    authFetch(`${API_URL}/api/usuarios/${alumnoId}`, {
       method: 'DELETE',
       headers: {
         Authorization: `Bearer ${token}`,

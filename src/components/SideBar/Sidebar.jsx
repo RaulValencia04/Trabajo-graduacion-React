@@ -7,7 +7,7 @@ const Sidebar = () => {
     const { state, logout } = useContext(AuthContext); // Accede al estado y la función logout desde el contexto
     const [isSidebarOpen, setIsSidebarOpen] = useState(true); // Estado para controlar la visibilidad del sidebar
     const navigate = useNavigate();
-    const token = sessionStorage.getItem('token');
+   
 
     const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
 
@@ -22,6 +22,7 @@ const Sidebar = () => {
     const userLinks = [
         { to: '/inicio', icon: 'fas fa-clock', text: 'INICIO' },
         { to: '/propuestas', icon: 'fas fa-file-upload', text: 'SUBIR PROPUESTA' },
+        { to: '/progreso', icon: 'fas fa-file-upload', text: 'MI PROGRESO' },
         { to: '/entregas', icon: 'fas fa-calendar-alt', text: 'ENTREGAS DE AVANCE' },
     ];
 

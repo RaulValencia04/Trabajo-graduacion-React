@@ -1,28 +1,30 @@
-import React, { useState, useEffect, useContext } from "react";
+// PropuestasAsesoria.jsx
+import React, { useState, useContext, useEffect, useCallback } from "react";
 import "./PropuestasAsesoria.css";
 import { AuthContext } from "../../Auth/Context/AuthContext";
 import { useNavigate } from "react-router-dom";
+import { useApi } from "../../Auth/Helpers/api";
 
 const PropuestasAsesoria = () => {
   const API_URL = process.env.REACT_APP_API_URL;
   const { state } = useContext(AuthContext);
   const { token, userId } = state;
   const navigate = useNavigate();
+  const { authFetch } = useApi();
 
   const [propuestas, setPropuestas] = useState([]);
+  const [error, setError] = useState(null); // Estado para manejar errores
 
-  const fetchPropuestas = async () => {
+  const fetchPropuestas = useCallback(async () => {
     try {
-      const response = await fetch(
-        `${API_URL}/api/trabajos/asignacion/${userId}`,
-        {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      if (!userId) {
+        throw new Error('User ID is not available');
+      }
+
+      const response = await authFetch(`${API_URL}/api/trabajos/asignacion/${userId}`, {
+        method: "GET",
+      });
+
       if (!response.ok) {
         throw new Error("Error al obtener las propuestas");
       }
@@ -30,27 +32,32 @@ const PropuestasAsesoria = () => {
       setPropuestas(data);
     } catch (error) {
       console.error("Error:", error);
+      setError("Hubo un problema al cargar las propuestas. Por favor, intenta nuevamente más tarde.");
     }
-  };
+  }, [API_URL, userId, authFetch]);
 
   useEffect(() => {
-    fetchPropuestas();
-  }, []);
+    if (state.logged && token && userId) { 
+      fetchPropuestas();
+    }
+  }, [fetchPropuestas, state.logged, token, userId]);
 
   const truncateText = (text, maxLength) => {
+    if (!text) return '';
     if (text.length > maxLength) {
       return `${text.substring(0, maxLength)}...`;
     }
     return text;
   };
 
-  const handleVerPropuesta = (id,tipoTrabajo) => {
+  const handleVerPropuesta = (id, tipoTrabajo) => {
     navigate(`/detalle_propuesta/${id}?q=${tipoTrabajo}`);
   };
 
   return (
     <div className="container">
       <h2 className="title">Trabajos con Usuarios</h2>
+      {error && <div className="error-message">{error}</div>} {/* Mostrar mensaje de error si existe */}
       <table className="tabla-propuestas">
         <thead>
           <tr>
@@ -67,7 +74,12 @@ const PropuestasAsesoria = () => {
         <tbody>
           {propuestas.length > 0 ? (
             propuestas.map((propuesta) => (
-              <tr key={propuesta.id}>
+              <tr
+                key={propuesta.id}
+                className={
+                  propuesta.estadoAsignacion === 'Rechazado' ? 'warning-row' : ''
+                }
+              >
                 <td>{propuesta.id}</td>
                 <td>{propuesta.titulo}</td>
                 <td>{truncateText(propuesta.descripcion, 75)}</td>
@@ -77,7 +89,9 @@ const PropuestasAsesoria = () => {
                 <td>
                   <button
                     className="btn-ver-detalle"
-                    onClick={() => handleVerPropuesta(propuesta.id,propuesta.tipoTrabajo)}
+                    onClick={() =>
+                      handleVerPropuesta(propuesta.id, propuesta.tipoTrabajo)
+                    }
                   >
                     Ver propuesta completa
                   </button>
@@ -86,7 +100,7 @@ const PropuestasAsesoria = () => {
             ))
           ) : (
             <tr>
-              <td colSpan="7">No hay propuestas disponibles</td>
+              <td colSpan="9">No hay propuestas disponibles</td> {/* Ajustar colspan */}
             </tr>
           )}
         </tbody>

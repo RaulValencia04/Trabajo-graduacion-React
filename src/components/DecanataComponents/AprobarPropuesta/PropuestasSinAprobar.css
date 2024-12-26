@@ -1,3 +1,5 @@
+/* PropuestasSinAprobar.css */
+
 .container {
   margin: 20px auto;
   padding: 20px;
@@ -46,19 +48,28 @@
 }
 
 .btn-ver-detalle {
-  background-color: #8aa7a9; 
-  color: #fff;
+  padding: 5px 10px;
+  background-color: #007bff; /* Blue */
+  color: white;
   border: none;
-  padding: 8px 16px;
-  margin: 5px;
-  border-radius: 5px;
+  border-radius: 4px;
   cursor: pointer;
   transition: background-color 0.3s ease;
   font-size: 14px;
 }
 
 .btn-ver-detalle:hover {
-  background-color: #6c8b8e; 
+  background-color: #0056b3;
+}
+
+/* Estilo para filas de advertencia */
+.warning-row {
+  background-color: #fff3cd; /* Light yellow background */
+  color: #856404; /* Dark yellow text */
+}
+
+.warning-row td {
+  border: 1px solid #ffeeba;
 }
 
 /* Opcional: Ajustes de respuesta para pantallas más pequeñas */
@@ -71,4 +82,27 @@
   .title {
     font-size: 20px;
   }
+}
+
+/* Estilización del motivo de rechazo */
+.motivo-rechazo {
+  text-decoration: underline;
+  color: #856404; /* Dark yellow */
+  cursor: pointer;
+}
+
+/* Mensaje de error */
+.error-message {
+  color: #dc3545; /* Rojo */
+  background-color: #f8d7da; /* Fondo rojo claro */
+  padding: 10px;
+  border-radius: 4px;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+/* Personalización de tooltip (opcional) */
+.react-tooltip {
+  max-width: 300px;
+  white-space: pre-wrap;
 }

@@ -6,7 +6,7 @@ import './RegistroUsuario.css';
 
 const RegistroUsuario = () => {
   const navigate = useNavigate(); // Inicializa navigate
-  const { state, dispatch } = useContext(AuthContext);
+  const {  dispatch } = useContext(AuthContext);
   const API_URL = process.env.REACT_APP_API_URL;
 
   const [form, setForm] = useState({

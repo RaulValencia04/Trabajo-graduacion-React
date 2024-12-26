@@ -1,4 +1,5 @@
-import React, { useContext,  } from "react";
+// App.js
+import React, { useContext } from "react";
 import {
   BrowserRouter as Router,
   Route,
@@ -6,7 +7,7 @@ import {
   Navigate,
   useLocation,
 } from "react-router-dom";
-import { AuthProvider, AuthContext } from "./Auth/Context/AutProvider";
+import { AuthProvider, AuthContext } from "./Auth/Context/AuthContext";
 import PrivateRoute from "./Auth/Context/PrivateRoute";
 import PublicRoute from "./Auth/Context/PublicRoute";
 
@@ -19,19 +20,20 @@ import Entregas from "./Entregas/Entregas";
 import Usuario from "./usuario/Usuario";
 import FormularioCrearUsuario from "./usuario/FormularioCrearUsuario";
 import PropuestasSinAprobar from "./DecanataComponents/AprobarPropuesta/PropuestasSinAprobar";
-import ProyectosAceptados from "./ProyectosAceptados/ProyectosAceptados";
+// import ProyectosAceptados from "./ProyectosAceptados/ProyectosAceptados";
 import AuditoriaList from "./AuditoriaList/AuditoriaList";
 import AlumnosActivos from "./DecanataComponents/AlumnosActivos/AlumnosActivos";
 import EntregasAprobadas from "./EntregasAprobadas/EntregasAprobadas";
-import FormulariosPasantia from "./FormulariosPropuestas/FormulariosPasantia";
-import "./App.css";
-import AsignacionEmpresa from "./FormulariosPropuestas/AsignacionEmpresa";
-import { SelectPropuestas } from "./FormulariosPropuestas/SelectPropuestas";
-import FormulariosProyecto from "./FormulariosPropuestas/FormulariosProyecto";
-import FormulariosInvestigacion from "./FormulariosPropuestas/FormulariosInvestigacion";
+import FormulariosPasantia from "./AlumnoComponents/FormulariosPropuestas/FormulariosPasantia";
+import AsignacionEmpresa from "./AlumnoComponents/FormulariosPropuestas/AsignacionEmpresa";
+import { SelectPropuestas } from "./AlumnoComponents/FormulariosPropuestas/SelectPropuestas";
+import FormulariosProyecto from "./AlumnoComponents/FormulariosPropuestas/FormulariosProyecto";
+import FormulariosInvestigacion from "./AlumnoComponents/FormulariosPropuestas/FormulariosInvestigacion";
 import TrabajoContainer from "./DecanataComponents/DetallesTrabajoGraduacion/TrabajoContainer";
 import PropuestasAsesoria from "./AsesorComponents/PropuestasAsesoria/PropuestasAsesoria";
+import Progreso from "./AlumnoComponents/Progreso/Progreso";
 
+import "./App.css";
 
 function App() {
   const { state } = useContext(AuthContext);
@@ -40,12 +42,12 @@ function App() {
 
   return (
     <div className="app-container">
-      {/* Show Sidebar only if not on auth pages */}
+      {/* Sidebar solo se muestra si NO estás en /login o /registro */}
       {!isAuthPage && <Sidebar />}
 
       <div className={`main-content ${!isAuthPage ? "content-shift" : ""}`}>
         <Routes>
-          {/* Public Routes */}
+          {/* Rutas Públicas */}
           <Route
             path="/login"
             element={
@@ -58,16 +60,12 @@ function App() {
             path="/registro"
             element={
               <PublicRoute>
-                {state.logged ? (
-                  <Navigate to="/inicio" replace />
-                ) : (
-                  <RegistroUsuario />
-                )}
+                {state.logged ? <Navigate to="/inicio" replace /> : <RegistroUsuario />}
               </PublicRoute>
             }
           />
 
-          {/* Private Routes */}
+          {/* Rutas Privadas */}
           <Route
             path="/inicio"
             element={
@@ -128,12 +126,12 @@ function App() {
           <Route
             path="/detalle_propuesta/:id"
             element={
-              <PrivateRoute allowedRoles={["Decano"]}>
+              <PrivateRoute allowedRoles={["Decano", "Asesor"]}>
                 <TrabajoContainer />
               </PrivateRoute>
             }
           />
-            <Route
+          <Route
             path="/peticiones_asesoria"
             element={
               <PrivateRoute allowedRoles={["Asesor"]}>
@@ -141,12 +139,19 @@ function App() {
               </PrivateRoute>
             }
           />
-          {/* por hacer */}
+          <Route
+            path="/progreso"
+            element={
+              <PrivateRoute allowedRoles={["Estudiante"]}>
+                <Progreso />
+              </PrivateRoute>
+            }
+          />
 
           <Route
             path="/propuestas"
             element={
-              <PrivateRoute allowedRoles={["Decano", "Asesor"]}>
+              <PrivateRoute allowedRoles={["Estudiante"]}>
                 <SelectPropuestas />
               </PrivateRoute>
             }
@@ -176,14 +181,14 @@ function App() {
             }
           />
 
-          <Route
+          {/* <Route
             path="/propuesta-aprobadas"
             element={
               <PrivateRoute allowedRoles={["Decano", "Asesor"]}>
                 <ProyectosAceptados />
               </PrivateRoute>
             }
-          />
+          /> */}
           <Route
             path="/historial"
             element={
@@ -200,7 +205,6 @@ function App() {
               </PrivateRoute>
             }
           />
-
           <Route
             path="/entregas-aprobadas"
             element={
@@ -210,13 +214,13 @@ function App() {
             }
           />
 
-          {/* Access Denied Route */}
+          {/* Ruta para Acceso Denegado */}
           <Route
             path="/no-autorizado"
             element={<div>No tienes autorización para ver esta página.</div>}
           />
 
-          {/* Default Redirect */}
+          {/* Redirección por defecto */}
           <Route path="*" element={<Navigate to="/inicio" />} />
         </Routes>
       </div>
@@ -224,6 +228,7 @@ function App() {
   );
 }
 
+// Envoltorio principal para proveer Router y AuthProvider
 export default function AppWrapper() {
   return (
     <Router>

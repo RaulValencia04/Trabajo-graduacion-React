@@ -42,6 +42,7 @@
   background-color: #e3aa11; /* Amarillo */
 }
 
+/* General modal styling */
 .modal {
   position: fixed;
   top: 0;
@@ -59,14 +60,76 @@
   background: white;
   padding: 2rem;
   border-radius: 10px;
-  width: 500px;
+  width: 600px;
+  max-height: 80vh;
+  overflow-y: auto;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
   animation: fadeIn 0.5s ease-in-out;
 }
 
-.animate-modal {
-  animation: slideIn 0.5s ease;
+.modal-actions {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 1rem;
 }
+
+.selected-asesor {
+  margin-top: 1rem;
+  padding: 1rem;
+  background: #f9f9f9;
+  border-left: 5px solid #800000;
+  border-radius: 8px;
+}
+
+.selected-asesor h4 {
+  color: #800000;
+  margin-bottom: 0.5rem;
+}
+
+.user-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.user-card {
+  padding: 1rem;
+  background: #fdf1dc;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease-in-out;
+  display: flex;
+  flex-direction: column;
+}
+
+.user-card:hover {
+  background: #ffe9b3;
+  border-color: #800000;
+}
+
+.user-card.selected {
+  background: #e3aa11;
+  color: white;
+}
+
+.user-card .user-name {
+  font-weight: bold;
+  margin-bottom: 0.3rem;
+}
+
+.user-card .user-email {
+  font-size: 0.9rem;
+  color: #555;
+}
+
+/* Button for removing asesor */
+.btn-remove {
+  margin-top: 1rem;
+  font-size: 0.9rem;
+}
+
 
 @keyframes slideIn {
   from {
@@ -135,7 +198,8 @@ input:checked + .slider:before {
   background-color: #e3aa11;
 }
 .selected-asesor {
-  margin-top: 1rem;
+  /* max-height: 10rem; */
+  margin-top: 0.5rem;
   padding: 1rem;
   background: #fdf1dc;
   border-left: 5px solid #800000;
@@ -144,4 +208,10 @@ input:checked + .slider:before {
 .selected-asesor h4 {
   color: #800000;
   margin-bottom: 0.5rem;
+}
+.project-count {
+  font-size: 0.9rem;
+  color: #800000; /* Rojo oscuro */
+  font-weight: bold;
+  margin-left: 0.5rem;
 }

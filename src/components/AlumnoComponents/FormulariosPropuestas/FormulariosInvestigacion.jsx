@@ -1,12 +1,15 @@
 import React, { useState, useContext } from "react";
-import FileUpload from "../docs/FileUpload";
+import FileUpload from "../../docs/FileUpload";
 import "./FormulariosPropuestas.css";
-import { AuthContext } from "../Auth/Context/AuthContext";
+import { AuthContext } from "../../Auth/Context/AuthContext";
 import { useNavigate } from "react-router-dom";
+import {useApi} from "../../Auth/Helpers/api"
 
-export default function FormulariosProyecto() {
+export default function FormulariosInvestigacion() {
+  const API_URL = process.env.REACT_APP_API_URL;
   const { state } = useContext(AuthContext);
   const { token, userId } = state;
+  const { authFetch } = useApi();
 
   const [trabajoData, setTrabajoData] = useState({
     titulo: "",
@@ -89,27 +92,8 @@ export default function FormulariosProyecto() {
     }));
   };
 
-  const handleArrayChange = (setter, index, value) => {
-    setter((prev) => {
-      if (!Array.isArray(prev)) throw new Error("El estado no es un array");
-      const updated = [...prev];
-      updated[index] = value;
-      return updated;
-    });
-  };
 
-  const addField = (setter, defaultValue) =>
-    setter((prev) => [...prev, defaultValue]);
-  const removeField = (setter, index) =>
-    setter((prev) => prev.filter((_, i) => i !== index));
 
-  const handleCronogramaChange = (index, field, value) => {
-    setProyectoData((prev) => {
-      const updated = [...prev.cronograma];
-      updated[index] = { ...updated[index], [field]: value };
-      return { ...prev, cronograma: updated };
-    });
-  };
 
   const handleCartaAceptacionChange = (field, value, index = 0) => {
     setProyectoData((prev) => {
@@ -119,12 +103,7 @@ export default function FormulariosProyecto() {
     });
   };
 
-  const handleFileUploadSuccess = (fileName) => {
-    setArchivosSubidos((prev) => ({
-      ...prev,
-      [fileName]: true,
-    }));
-  };
+
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -184,8 +163,8 @@ export default function FormulariosProyecto() {
     console.log("JSON para enviar:", jsonData);
   
     try {
-      const response = await fetch(
-        "http://localhost:8080/api/proyectos/crear-completo",
+      const response = await authFetch(
+        `${ API_URL }/api/proyectos/crear-completo`,
         {
           method: "POST",
           headers: {
@@ -207,8 +186,8 @@ export default function FormulariosProyecto() {
   
       // Segundo POST para asociar el usuario al trabajo de graduación
       const trabajoId = result.trabajoGraduacion.id;
-      const segundoPostResponse = await fetch(
-        `http://localhost:8080/api/miembros-trabajo/add?trabajoId=${trabajoId}&usuarioId=${userId}`,
+      const segundoPostResponse = await authFetch(
+        `${API_URL}/api/miembros-trabajo/add?trabajoId=${trabajoId}&usuarioId=${userId}`,
         {
           method: "POST",
           headers: {

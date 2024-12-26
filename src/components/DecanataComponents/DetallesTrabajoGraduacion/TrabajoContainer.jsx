@@ -1,7 +1,8 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useEffect, useContext, useCallback } from "react";
 import { AuthContext } from "../../Auth/Context/AuthContext";
 import DetallesTrabajoGraduacion from "./DetallesTrabajoGraduacion";
 import { useLocation, useParams } from "react-router-dom";
+import { useApi } from "../../Auth/Helpers/api";
 
 const TrabajoContainer = () => {
   const API_URL = process.env.REACT_APP_API_URL;
@@ -11,35 +12,38 @@ const TrabajoContainer = () => {
   const location = useLocation();
   const queryParams = new URLSearchParams(location.search);
   const tipoTrabajo = queryParams.get("q");
+  const { authFetch } = useApi();
 
   const [trabajo, setTrabajo] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const fetchTrabajo = async () => {
+  /**
+   * Ahora usamos useCallback para memoizar la función fetchTrabajo.
+   * Sus dependencias deben ser todas las variables que se usan adentro.
+   */
+  const fetchTrabajo = useCallback(async () => {
     setLoading(true);
     setError(null);
 
-    try {
+    try { 
       let response;
 
       if (tipoTrabajo === "Pasantía") {
-        response = await fetch(`${API_URL}/api/trabajos/${id}/pasantia`, {
+        response = await authFetch(`${API_URL}/api/trabajos/${id}/pasantia`, {
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
           },
         });
       } else if (tipoTrabajo === "Proyecto" || tipoTrabajo === "Investigación") {
-        response = await fetch(`${API_URL}/api/trabajos/usuario_completo/${id}`, {
+        response = await authFetch(`${API_URL}/api/trabajos/usuario_completo/${id}`, {
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
           },
         });
       } else {
-
-        console.log(tipoTrabajo);
         throw new Error("Tipo de trabajo no válido.");
       }
 
@@ -56,12 +60,14 @@ const TrabajoContainer = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [API_URL,authFetch, token, tipoTrabajo, id]);
 
+  /**
+   * Ahora, la dependencia real es `fetchTrabajo`.
+   */
   useEffect(() => {
     fetchTrabajo();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [id]);
+  }, [fetchTrabajo]);
 
   if (loading) return <p>Cargando datos...</p>;
   if (error) return <p>{error}</p>;

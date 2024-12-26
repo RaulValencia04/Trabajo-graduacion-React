@@ -1,9 +1,12 @@
 import React, { useState, useContext} from "react";
-import FileUpload from "../docs/FileUpload"; // Importación del componente personalizado de carga de archivos
+import FileUpload from "../../docs/FileUpload"; // Importación del componente personalizado de carga de archivos
 import "./FormulariosPropuestas.css";
-import { AuthContext } from "../Auth/Context/AuthContext";
+import { AuthContext } from "../../Auth/Context/AuthContext";
+import {useApi} from "../../Auth/Helpers/api"
 
 const FormularioPasantia = () => {
+  const API_URL = process.env.REACT_APP_API_URL;
+  const { authFetch } = useApi();
   const [formData, setFormData] = useState({
     titulo: "",
     antecedentesInstitucion: "",
@@ -86,12 +89,7 @@ const FormularioPasantia = () => {
     setCurrentStep((prev) => Math.min(prev + 1, steps.length - 1));
   const prevStep = () => setCurrentStep((prev) => Math.max(prev - 1, 0));
 
-  const handleFileUploadSuccess = (fileName) => {
-    setArchivosSubidos((prev) => ({
-      ...prev,
-      [fileName]: true, // Marca el archivo como subido
-    }));
-  };
+
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -137,7 +135,7 @@ const FormularioPasantia = () => {
       },
     };
   
-    console.log("JSON para enviar:", jsonData);
+  
   
     if (
       !rutaInscripcion ||
@@ -151,8 +149,8 @@ const FormularioPasantia = () => {
   
     // Enviar al backend
     try {
-      const response = await fetch(
-        "http://localhost:8080/api/pasantias/crear-completa",
+      const response = await authFetch(
+        `${API_URL}/api/pasantias/crear-completa`,
         {
           method: "POST",
           headers: {
@@ -172,8 +170,8 @@ const FormularioPasantia = () => {
       console.log(result.trabajoGraduacion.id);
   
       // Realizar el segundo POST con el id del trabajo de graduación y el userId
-      const segundoPostResponse = await fetch(
-        `http://localhost:8080/api/miembros-trabajo/add?trabajoId=${result.trabajoGraduacion.id}&usuarioId=${state.userId}`, 
+      const segundoPostResponse = await authFetch(
+        `${API_URL}/api/miembros-trabajo/add?trabajoId=${result.trabajoGraduacion.id}&usuarioId=${state.userId}`, 
         {
           method: "POST",
           headers: {

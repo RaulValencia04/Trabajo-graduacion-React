@@ -1,7 +1,11 @@
 import React, { useState } from "react";
 import "./FormulariosPropuestas.css";
+import {useApi} from "../../Auth/Helpers/api"
 
 const AsignacionEmpresa = () => {
+  const { authFetch } = useApi();
+  const API_URL = process.env.REACT_APP_API_URL;
+ 
   const [formData, setFormData] = useState({
     titulo: "",
     descripcion: "",
@@ -31,7 +35,6 @@ const AsignacionEmpresa = () => {
   const [successMessage, setSuccessMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
 
-  const API_URL = "http://localhost:8080/api/pasantias";
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -59,7 +62,7 @@ const AsignacionEmpresa = () => {
       asignacionEmpresa,
     };
 
-    fetch(API_URL, {
+    authFetch(`${API_URL}/api/pasantias`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),

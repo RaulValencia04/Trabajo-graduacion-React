@@ -1,20 +1,20 @@
-import React from 'react';
+
+import React, { useContext } from 'react';
 import { Navigate } from 'react-router-dom';
-import { useContext } from 'react';
-import { AuthContext } from './AuthContext';
+import { AuthContext } from './AuthContext'; 
 
-function PrivateRoute({ children, requiredRole }) {
-    const { state } = useContext(AuthContext);
+function PrivateRoute({ children, allowedRoles }) {
+  const { state } = useContext(AuthContext);
 
-    if (!state.logged) {
-        return <Navigate to="/login" />;
-    }
+  if (!state.logged) {
+    return <Navigate to="/login" />;
+  }
+  if (allowedRoles && !allowedRoles.includes(state.role)) {
+    return <Navigate to="/no-autorizado" />;
+  }
 
-    if (requiredRole && state.role !== requiredRole) {
-        return <Navigate to="/no-autorizado" />; // Redirige a una página de acceso denegado si el rol no coincide
-    }
-
-    return children;
+  return children;
 }
-
 export default PrivateRoute;
+
+

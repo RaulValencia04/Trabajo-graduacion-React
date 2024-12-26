@@ -35,14 +35,14 @@ const DetallesTrabajoGraduacion = ({ trabajo }) => {
     supervisor,
   };
 
-  console.log("Trabajo parseado:", trabajoParseado);
+ 
 
   if (tipoTrabajo === "Pasantía") {
     return <DetallesPasantia trabajo={trabajoParseado} />;
   } else if (tipoTrabajo === "Proyecto" || tipoTrabajo === "Investigación") {
     return <DetallesProyectoOInvestigacion trabajo={trabajoParseado} />;
   } else {
-    console.log(tipoTrabajo);
+    
     return <p>No se reconoce el tipo de trabajo</p>;
   }
 };

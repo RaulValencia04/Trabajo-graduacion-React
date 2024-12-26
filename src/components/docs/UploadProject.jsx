@@ -1,12 +1,9 @@
-import React from 'react';
-import FileUpload from './FileUpload'; 
+import React from 'react'; 
 import InfoDocs from '../informacion/infodocs';
 import './UploadProject.css'; // Importa el nuevo archivo CSS
 
 const UploadProject = () => {
-  const handleFileUploadSuccess = (response) => {
-    console.log('Project uploaded successfully:', response);
-  };
+
 
   return (
     <div className="upload-project-container">
