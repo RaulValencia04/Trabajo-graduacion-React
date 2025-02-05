@@ -138,7 +138,7 @@ const EvaluarTrabajo = ({ trabajoId }) => {
           const responseActAsig = await authFetch(
             `${API_URL}/api/asignaciones/trabajo/${trabajoId}/estado?nuevoEstado=Aceptado`,
             {
-              method: "PATCH", // Cambiado a PATCH para coincidir con el método del servidor
+              method: "PATCH", 
      
             }
           ); 
@@ -152,7 +152,7 @@ const EvaluarTrabajo = ({ trabajoId }) => {
             return;
           }
         } else {
-          console.log("dos")
+          // console.log("dos")
         
           
           const responseActAsig = await authFetch(
@@ -161,13 +161,17 @@ const EvaluarTrabajo = ({ trabajoId }) => {
               method: "PATCH",
             }
           );  
-          const responseComen = await authFetch(`${API_URL}/api/trabajos/${trabajoId}/actualizarComentAsesor`,{
-
-            method:"PUT",
+          const responseComen = await authFetch(`${API_URL}/api/trabajos/${trabajoId}/actualizar-comentario-asesor`, {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",        
+              "Authorization": `Bearer ${token}`          
+            },
             body: JSON.stringify({
               comentariosAsesor: `${comentarios} - ${email}`,
             })
-          })   
+          });
+            
           if (!responseComen.ok) {
             console.error("Error al actualizar el Comentario de la asignación.");
             return;
@@ -313,17 +317,18 @@ const EvaluarTrabajo = ({ trabajoId }) => {
             )}
 
             <div className="modal-actions">
-              <button
-                className="action-button btn-success"
-                onClick={handleEnviar}
-              >
-                Enviar
-              </button>
+             
               <button
                 className="action-button btn-danger"
                 onClick={toggleModal}
               >
                 Cancelar
+              </button>
+              <button
+                className="action-button btn-success"
+                onClick={handleEnviar}
+              >
+                Enviar
               </button>
             </div>
           </div>

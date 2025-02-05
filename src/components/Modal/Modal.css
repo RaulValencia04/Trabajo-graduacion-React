@@ -1,0 +1,61 @@
+/* Fondo de superposición */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+  }
+  
+  /* Contenedor del modal */
+  .modal-container {
+    background: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    max-width: 500px;
+    width: 100%;
+    position: relative;
+    animation: slide-down 0.3s ease-out;
+  }
+  
+  /* Animación de entrada */
+  @keyframes slide-down {
+    from {
+      transform: translateY(-30px);
+      opacity: 0;
+    }
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+  
+  /* Contenido del modal */
+  .modal-content {
+    margin-top: 10px;
+  }
+  
+  /* Botón de cerrar */
+  .modal-close-button {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #555;
+    cursor: pointer;
+    transition: color 0.3s ease;
+  }
+  
+  .modal-close-button:hover {
+    color: #000;
+  }
+  

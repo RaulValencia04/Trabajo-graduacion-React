@@ -22,20 +22,28 @@ const DetallesProyectoOInvestigacion = ({ trabajo }) => {
     inscripcionTrabajoGraduacion,
     certificacionGlobalNotas,
     constanciaServicioSocial,
-    cartaAceptacion,
+    cartaAceptacion, // No modificar esta variable directamente
     estado,
     fechaCreacion,
   } = trabajo;
 
-  
-  let parsedActores = [];
-  let parsedObjetivos = [];
-  let parsedAsesores = [];
+  // Asegurar que cartaAceptacion sea un array válido
+  const parsedCartaAceptacion = Array.isArray(cartaAceptacion)
+    ? cartaAceptacion
+    : [];
 
+  let parsedObjetivos = [];
+
+  const parsedAsesores = Array.isArray(asesoresPropuestos)
+    ? asesoresPropuestos
+    : [];
+
+  let parsedActores = {};
   try {
-    parsedActores = actores ? JSON.parse(actores) : [];
+    parsedActores = actores ? JSON.parse(actores) : {};
   } catch (error) {
-    parsedActores = ["No se pudo parsear actores"];
+    console.error("Error al parsear los actores:", error);
+    parsedActores = {};
   }
 
   try {
@@ -44,11 +52,18 @@ const DetallesProyectoOInvestigacion = ({ trabajo }) => {
     parsedObjetivos = ["No se pudo parsear objetivos"];
   }
 
-  try {
-    parsedAsesores = asesoresPropuestos ? JSON.parse(asesoresPropuestos) : [];
-  } catch (error) {
-    parsedAsesores = ["No se pudo parsear asesores propuestos"];
-  }
+  // try {
+  //   parsedCartaAceptacion =
+  //     typeof cartaAceptacion === "string"
+  //       ? JSON.parse(cartaAceptacion)
+  //       : Array.isArray(cartaAceptacion)
+  //       ? cartaAceptacion
+  //       : [];
+  // } catch (error) {
+  //   console.error("Error al parsear cartaAceptacion:", error);
+  //   parsedCartaAceptacion = [];
+  // }
+  // console.log("parsedCartaAceptacion:", parsedCartaAceptacion);
 
   return (
     <div className="document-wrapper">
@@ -71,7 +86,7 @@ const DetallesProyectoOInvestigacion = ({ trabajo }) => {
               <p>{miembros}</p>
             </div>
           )}
-          {parsedAsesores.length > 0 && (
+          {parsedAsesores && parsedAsesores.length > 0 ? (
             <div>
               <strong>Asesores Propuestos:</strong>
               <ul>
@@ -80,6 +95,8 @@ const DetallesProyectoOInvestigacion = ({ trabajo }) => {
                 ))}
               </ul>
             </div>
+          ) : (
+            <p>No hay asesores propuestos disponibles.</p>
           )}
         </section>
 
@@ -139,11 +156,19 @@ const DetallesProyectoOInvestigacion = ({ trabajo }) => {
           </p>
 
           <h3>Actores</h3>
-          {parsedActores.length > 0 ? (
+          {Object.keys(parsedActores).length > 0 ? (
             <ul>
-              {parsedActores.map((actor, index) => (
-                <li key={index}>{actor}</li>
-              ))}
+              {Object.entries(parsedActores).map(([rol, datos], index) =>
+                datos.nombre.trim() ? ( // Solo mostrar si el nombre no está vacío
+                  <li key={index}>
+                    <strong>
+                      {rol.charAt(0).toUpperCase() + rol.slice(1)}:
+                    </strong>{" "}
+                    {datos.nombre} <br />
+                    <small>{datos.descripcion}</small>
+                  </li>
+                ) : null
+              )}
             </ul>
           ) : (
             <p>No hay actores disponibles.</p>
@@ -152,77 +177,88 @@ const DetallesProyectoOInvestigacion = ({ trabajo }) => {
 
         {/* Sección 5: Documentos y archivos relacionados */}
         <section className="document-section">
-      <h2>Documentos Relacionados</h2>
-      <div className="document-container">
-        {/* Inscripción Trabajo de Graduación */}
-        <div className="document-item">
-          <h3>Inscripción Trabajo Graduación</h3>
-          {inscripcionTrabajoGraduacion ? (
-            <img
-              src={`${API_URL}/uploads/${inscripcionTrabajoGraduacion}`}
-              alt="Inscripción Trabajo Graduación"
-              className="document-image"
-              onError={(e) => {
-                e.target.src = "/images/placeholder.png"; // Imagen de reemplazo
-              }}
-            />
-          ) : (
-            <p>No disponible</p>
-          )}
-        </div>
+          <h2>Documentos Relacionados</h2>
+          <div className="document-container">
+            {/* Inscripción Trabajo de Graduación */}
+            <div className="document-item">
+              <h3>Inscripción Trabajo Graduación</h3>
+              {inscripcionTrabajoGraduacion ? (
+                <img
+                  src={`${API_URL}/uploads/${inscripcionTrabajoGraduacion}`}
+                  alt="Inscripción Trabajo Graduación"
+                  className="document-image"
+                  onError={(e) => {
+                    e.target.src = "/images/placeholder.png"; // Imagen de reemplazo
+                  }}
+                />
+              ) : (
+                <p>No disponible</p>
+              )}
+            </div>
 
-        {/* Certificación Global de Notas */}
-        <div className="document-item">
-          <h3>Certificación Global de Notas</h3>
-          {certificacionGlobalNotas ? (
-            <img
-              src={`${API_URL}/uploads/${certificacionGlobalNotas}`}
-              alt="Certificación Global de Notas"
-              className="document-image"
-              onError={(e) => {
-                e.target.src = "/images/placeholder.png";
-              }}
-            />
-          ) : (
-            <p>No disponible</p>
-          )}
-        </div>
+            {/* Certificación Global de Notas */}
+            <div className="document-item">
+              <h3>Certificación Global de Notas</h3>
+              {certificacionGlobalNotas ? (
+                <img
+                  src={`${API_URL}/uploads/${certificacionGlobalNotas}`}
+                  alt="Certificación Global de Notas"
+                  className="document-image"
+                  onError={(e) => {
+                    e.target.src = "/images/placeholder.png";
+                  }}
+                />
+              ) : (
+                <p>No disponible</p>
+              )}
+            </div>
 
-        {/* Constancia de Servicio Social */}
-        <div className="document-item">
-          <h3>Constancia de Servicio Social</h3>
-          {constanciaServicioSocial ? (
-            <img
-              src={`${API_URL}/uploads/${constanciaServicioSocial}`}
-              alt="Constancia de Servicio Social"
-              className="document-image"
-              onError={(e) => {
-                e.target.src = "/images/placeholder.png";
-              }}
-            />
-          ) : (
-            <p>No disponible</p>
-          )}
-        </div>
+            {/* Constancia de Servicio Social */}
+            <div className="document-item">
+              <h3>Constancia de Servicio Social</h3>
+              {constanciaServicioSocial ? (
+                <img
+                  src={`${API_URL}/uploads/${constanciaServicioSocial}`}
+                  alt="Constancia de Servicio Social"
+                  className="document-image"
+                  onError={(e) => {
+                    e.target.src = "/images/placeholder.png";
+                  }}
+                />
+              ) : (
+                <p>No disponible</p>
+              )}
+            </div>
 
-        {/* Carta de Aceptación */}
-        <div className="document-item">
-          <h3>Carta de Aceptación</h3>
-          {cartaAceptacion && cartaAceptacion[0]?.documento ? (
-            <img
-              src={`${API_URL}/uploads/${cartaAceptacion[0]?.documento}`}
-              alt="Carta de Aceptación"
-              className="document-image"
-              onError={(e) => {
-                e.target.src = "/images/placeholder.png";
-              }}
-            />
-          ) : (
-            <p>No disponible</p>
-          )}
-        </div>
-      </div>
-    </section>
+            {/* Carta de Aceptación */}
+            <div className="document-item">
+              <h3>Carta de Aceptación</h3>
+              {parsedCartaAceptacion.length > 0 ? (
+                <>
+                  <p>
+                    <strong>Fecha:</strong>{" "}
+                    {new Date(
+                      parsedCartaAceptacion[0].fecha[0],
+                      parsedCartaAceptacion[0].fecha[1] - 1,
+                      parsedCartaAceptacion[0].fecha[2]
+                    ).toLocaleDateString()}
+                  </p>
+                  <img
+                    src={`${API_URL}/uploads/${parsedCartaAceptacion[0].documento}`}
+                    alt="Carta de Aceptación"
+                    className="document-image"
+                    onError={(e) => {
+                      console.error("Error al cargar la imagen:", e.target.src);
+                      e.target.src = "/images/placeholder.png"; // Imagen de respaldo en caso de error
+                    }}
+                  />
+                </>
+              ) : (
+                <p>No disponible</p>
+              )}
+            </div>
+          </div>
+        </section>
       </div>
     </div>
   );

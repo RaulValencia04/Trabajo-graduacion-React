@@ -1,7 +1,7 @@
-import {jwtDecode} from 'jwt-decode'; // Importación corregida
+import { jwtDecode } from 'jwt-decode';
 import React, { useState, useContext, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { AuthContext } from './Context/AuthContext'; // Asegúrate de que la ruta es correcta
+import { AuthContext } from './Context/AuthContext';
 import './Login.css';
 
 const Login = () => {
@@ -13,7 +13,7 @@ const Login = () => {
   const { dispatch } = useContext(AuthContext);
 
   useEffect(() => {
-    const savedToken = sessionStorage.getItem('token'); // Usamos 'token' para el almacenamiento local
+    const savedToken = sessionStorage.getItem('token');
     const savedRefreshToken = sessionStorage.getItem('refreshToken');
 
     if (savedToken && savedRefreshToken) {
@@ -23,7 +23,7 @@ const Login = () => {
           dispatch({
             type: 'login',
             payload: {
-              token: savedToken, // Usamos 'token' para el estado
+              token: savedToken,
               refreshToken: savedRefreshToken,
               role: decodedToken.role,
               email: decodedToken.sub,
@@ -32,7 +32,6 @@ const Login = () => {
           });
           navigate('/inicio', { replace: true });
         } else {
-          // Si el token expiró, lo removemos
           sessionStorage.removeItem('token');
           sessionStorage.removeItem('refreshToken');
         }
@@ -58,14 +57,14 @@ const Login = () => {
       }
 
       const data = await response.json();
-      const { accessToken, refreshToken } = data; // Capturamos como accessToken
+      const { accessToken, refreshToken } = data;
 
       const decodedToken = jwtDecode(accessToken);
 
       dispatch({
         type: 'login',
         payload: {
-          token: accessToken, // Guardamos como token en el estado
+          token: accessToken,
           refreshToken,
           role: decodedToken.role,
           email: decodedToken.sub,
@@ -73,7 +72,7 @@ const Login = () => {
         },
       });
 
-      sessionStorage.setItem('token', accessToken); // Guardamos como token en sessionStorage
+      sessionStorage.setItem('token', accessToken);
       sessionStorage.setItem('refreshToken', refreshToken);
 
       navigate('/inicio', { replace: true });
@@ -111,10 +110,17 @@ const Login = () => {
             />
           </div>
           {error && <p className="error-message">{error}</p>}
-          <button type="submit" className="btn btn-primary btn-block">
+          <button type="submit" className="btn btn-primary">
             Iniciar Sesión
           </button>
         </form>
+        <button
+          type="button"
+          className="btn btn-secondary"
+          onClick={() => navigate('/registro')}
+        >
+          Registrarse
+        </button>
       </div>
     </div>
   );

@@ -1,0 +1,108 @@
+.form-container {
+    max-width: 800px;
+    margin: 0 auto;
+    background-color: #fdfdfd;
+    padding: 20px 30px;
+    border-radius: 5px;
+    border: 1px solid #ddd;
+  }
+  
+  .title-form {
+    text-align: center;
+    margin-bottom: 1.5rem;
+    color: #333;
+  }
+  
+  .tabs-container {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+  }
+  
+  .tab {
+    flex: 1;
+    text-align: center;
+    padding: 10px;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: 0.2s;
+  }
+  
+  .tab.active-tab {
+    border-bottom: 2px solid #ff0000;
+    font-weight: bold;
+    color: #ff0000;
+  }
+  
+  .form-step {
+    margin-top: 1.5rem;
+  }
+  
+  .label {
+    font-weight: 600;
+  }
+  
+  .input-field,
+  .textarea-field {
+    width: 100%;
+    padding: 8px;
+    margin-top: 5px;
+    margin-bottom: 15px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+  }
+  
+  .textarea-field {
+    min-height: 80px;
+    resize: vertical;
+  }
+  
+  .help-text {
+    font-size: 0.9rem;
+    color: #666;
+    margin-bottom: 1rem;
+  }
+  
+  .cronograma-item,
+  .activity-item,
+  .report-item {
+    margin-bottom: 0.75rem;
+    background-color: #fafafa;
+    padding: 10px;
+    border: 1px dashed #ccc;
+    border-radius: 4px;
+  }
+  
+  .btn-delete,
+  .btn-add,
+  .btn-nav,
+  .btn-submit {
+    background-color: #ff0000;
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-right: 5px;
+  }
+  
+  .btn-delete {
+    background-color: #dc3545;
+    margin-left: 10px;
+  }
+  
+  .btn-delete:hover {
+    background-color: #c82333;
+  }
+  
+  .btn-add:hover,
+  .btn-nav:hover,
+  .btn-submit:hover {
+    opacity: 0.8;
+  }
+  
+  .navigation-buttons {
+    text-align: center;
+    margin-top: 2rem;
+  }
+  

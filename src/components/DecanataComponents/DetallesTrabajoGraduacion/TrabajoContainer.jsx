@@ -37,7 +37,7 @@ const TrabajoContainer = () => {
           },
         });
       } else if (tipoTrabajo === "Proyecto" || tipoTrabajo === "Investigación") {
-        response = await authFetch(`${API_URL}/api/trabajos/usuario_completo/${id}`, {
+        response = await authFetch(`${API_URL}/api/trabajos/usuario-completo/${id}`, {
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
@@ -53,6 +53,7 @@ const TrabajoContainer = () => {
       }
 
       const data = await response.json();
+      console.log(data); // aqui si tengo carta de aceptacion, cuando lla llega al otro form no pasa carta de aceptcion
       setTrabajo(data);
     } catch (err) {
       console.error(err);

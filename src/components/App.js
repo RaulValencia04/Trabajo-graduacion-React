@@ -32,8 +32,11 @@ import FormulariosInvestigacion from "./AlumnoComponents/FormulariosPropuestas/F
 import TrabajoContainer from "./DecanataComponents/DetallesTrabajoGraduacion/TrabajoContainer";
 import PropuestasAsesoria from "./AsesorComponents/PropuestasAsesoria/PropuestasAsesoria";
 import Progreso from "./AlumnoComponents/Progreso/Progreso";
-
+import PlanTrabajo from "./AlumnoComponents/PlanDeTrabajo/PlanTrabajo";
+import PlanesAsesorList from "./AsesorComponents/PlanesAsesorList/PlanesAsesorList";
+import PlanTrabajoDetalle from "./AsesorComponents/PlanesAsesorList/PlanTrabajoDetalle/PlanTrabajoDetalle"
 import "./App.css";
+
 
 function App() {
   const { state } = useContext(AuthContext);
@@ -60,7 +63,11 @@ function App() {
             path="/registro"
             element={
               <PublicRoute>
-                {state.logged ? <Navigate to="/inicio" replace /> : <RegistroUsuario />}
+                {state.logged ? (
+                  <Navigate to="/inicio" replace />
+                ) : (
+                  <RegistroUsuario />
+                )}
               </PublicRoute>
             }
           />
@@ -177,6 +184,41 @@ function App() {
             element={
               <PrivateRoute allowedRoles={["Decano"]}>
                 <FormularioCrearUsuario />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/plan-trabajo"
+            element={
+              <PrivateRoute allowedRoles={["Estudiante"]}>
+                < PlanTrabajo/>
+              </PrivateRoute>
+            }
+          />
+
+
+          <Route
+            path="/progreso"
+            element={
+              <PrivateRoute allowedRoles={["Estudiante"]}>
+                <Progreso />
+              </PrivateRoute>
+            }
+          />
+          
+          <Route
+            path="/lista-planes"
+            element={
+              <PrivateRoute allowedRoles={["Asesor"]}>
+                <PlanesAsesorList />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/lista-planes/detalle/:planId"
+            element={
+              <PrivateRoute allowedRoles={["Asesor"]}>
+                <PlanTrabajoDetalle />
               </PrivateRoute>
             }
           />

@@ -9,15 +9,27 @@ const DetallesTrabajoGraduacion = ({ trabajo }) => {
   // Destructuring seguro
   const { tipoTrabajo } = trabajoFinal;
 
-  // Parsear campos JSON si existen
-  const parseField = (field) => {
+// En DetallesTrabajoGraduacion.js
+const parseField = (field) => {
+  // 1. Si ya es un array, devuélvelo
+  if (Array.isArray(field)) {
+    return field;
+  }
+
+  // 2. Si es string, intenta parsear
+  if (typeof field === "string") {
     try {
-      return field ? JSON.parse(field) : [];
+      return JSON.parse(field);
     } catch (error) {
-      console.error(`Error al parsear campo ${field}`, error);
-      return [];
+      console.error("Error al parsear campo JSON:", field, error);
+      return []; // Devuelve array vacío si falla
     }
-  };
+  }
+
+  // 3. Si es null, undefined, objeto, etc.
+  return field || [];
+};
+
 
   // Campos específicos que requieren parseo
   const actividades = parseField(trabajoFinal.actividades);

@@ -1,6 +1,6 @@
 import { useContext, useCallback } from 'react';
 import { AuthContext } from '../Context/AuthContext';
-import {jwtDecode} from 'jwt-decode'; // Asegúrate de usar la importación correcta
+import {jwtDecode} from 'jwt-decode'; 
 
 export function useApi() {
   const { state, dispatch, logout } = useContext(AuthContext);

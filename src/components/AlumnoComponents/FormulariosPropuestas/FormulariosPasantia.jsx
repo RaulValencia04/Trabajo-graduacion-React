@@ -1,30 +1,35 @@
-import React, { useState, useContext} from "react";
-import FileUpload from "../../docs/FileUpload"; // Importación del componente personalizado de carga de archivos
+import React, { useState, useContext } from "react";
+import FileUpload from "../../docs/FileUpload";
 import "./FormulariosPropuestas.css";
 import { AuthContext } from "../../Auth/Context/AuthContext";
-import {useApi} from "../../Auth/Helpers/api"
+import { useApi } from "../../Auth/Helpers/api";
 
-const FormularioPasantia = () => {
-  const API_URL = process.env.REACT_APP_API_URL;
+function FormularioPasantia() {
+  const { state } = useContext(AuthContext);
+  const { token, userId } = state;
   const { authFetch } = useApi();
+  const API_URL = process.env.REACT_APP_API_URL;
+
+  function countWords(text) {
+    return text.trim().split(/\s+/).filter(Boolean).length;
+  }
+
+  function countWordsArray(arr) {
+    return arr.reduce((acc, item) => acc + countWords(item), 0);
+  }
+
   const [formData, setFormData] = useState({
-    titulo: "",
-    antecedentesInstitucion: "",
-    descripcionEmpresa: "",
-    supervisor: { nombre: "", cargo: "", contacto: "" },
-    asesores: ["", "", ""],
-    cartaAceptacion: "",
-    correosInstitucionales: "",
     Fecha_inicio: "",
     Fecha_fin: "",
+    antecedentesInstitucion: "",
+    descripcionEmpresa: "",
     nombreEmpresa: "",
     contactoEmpresa: "",
     direccionEmpresa: "",
-
-    evaluacionEmpresa: "Pendiente",
+    supervisor: { nombre: "", cargo: "", contacto: "" },
+    asesores: ["", "", ""],
+    cartaAceptacionFecha: "",
   });
-  const { state } = useContext(AuthContext);
-  const { token } = state;
 
   const [actividades, setActividades] = useState([""]);
   const [archivosSubidos, setArchivosSubidos] = useState({
@@ -32,9 +37,14 @@ const FormularioPasantia = () => {
     inscripcion_trabajo_graduacion: false,
     certificacion_global_notas: false,
     constancia_servicio_social: false,
-  }); // Estado para rastrear el estado de los archivos subidos
-  const [currentStep, setCurrentStep] = useState(0);
+  });
 
+  const [rutaInscripcion, setRutaInscripcion] = useState(null);
+  const [rutaCertificacion, setRutaCertificacion] = useState(null);
+  const [rutaServicioSocial, setRutaServicioSocial] = useState(null);
+  const [rutaCartaAceptacion, setRutaCartaAceptacion] = useState(null);
+
+  const [currentStep, setCurrentStep] = useState(0);
   const steps = [
     "Portada",
     "Antecedentes de la Institución",
@@ -44,61 +54,96 @@ const FormularioPasantia = () => {
     "Asesores Propuestos",
     "Datos Adicionales",
   ];
-  const [rutaInscripcion, setRutaInscripcion] = useState(null);
-  const [rutaCertificacion, setRutaCertificacion] = useState(null);
-  const [rutaServicioSocial, setRutaServicioSocial] = useState(null);
-  const [rutaCartaAceptacion, setRutaCartaAceptacion] = useState(null);
 
-  const handleChange = (e) => {
+  // Límites de palabras
+  const MIN_ANTECEDENTES = 200;
+  const MAX_ANTECEDENTES = 350;
+  const MIN_DESCR_EMP = 1200;
+  const MAX_DESCR_EMP = 1500;
+  const MIN_ACTIVIDADES = 550;
+  const MAX_ACTIVIDADES = 650;
+  // const MIN_ASESORES = 100;
+  // const MAX_ASESORES = 200;
+
+  function nextStep() {
+    setCurrentStep((p) => Math.min(p + 1, steps.length - 1));
+  }
+
+  function prevStep() {
+    setCurrentStep((p) => Math.max(p - 1, 0));
+  }
+
+  function handleChange(e) {
     const { name, value } = e.target;
-
     if (name.startsWith("supervisor.")) {
-      const field = name.split(".")[1]; // Extrae el campo (e.g., "nombre", "cargo", etc.)
+      const field = name.split(".")[1];
       setFormData((prev) => ({
         ...prev,
-        supervisor: {
-          ...prev.supervisor,
-          [field]: value, // Actualiza solo el campo correspondiente del supervisor
-        },
+        supervisor: { ...prev.supervisor, [field]: value },
       }));
     } else {
-      setFormData((prev) => ({
-        ...prev,
-        [name]: value, // Actualiza cualquier otro campo
-      }));
+      setFormData((prev) => ({ ...prev, [name]: value }));
     }
-  };
+  }
 
-  const handleArrayChange = (setter, index, value) => {
+  function handleArrayChange(setter, index, value) {
     setter((prev) => {
-      if (!Array.isArray(prev)) {
-        throw new Error("El estado no es un array");
-      }
       const updated = [...prev];
-      updated[index] = value; // Actualiza el índice correspondiente
+      updated[index] = value;
       return updated;
     });
-  };
+  }
 
-  const addField = (setter, defaultValue) =>
-    setter((prev) => [...prev, defaultValue]);
-  const removeField = (setter, index) =>
+  function addField(setter, def) {
+    setter((prev) => [...prev, def]);
+  }
+
+  function removeField(setter, index) {
     setter((prev) => prev.filter((_, i) => i !== index));
+  }
 
-  const nextStep = () =>
-    setCurrentStep((prev) => Math.min(prev + 1, steps.length - 1));
-  const prevStep = () => setCurrentStep((prev) => Math.max(prev - 1, 0));
-
-
-
-  const handleSubmit = async (e) => {
+  async function handleSubmit(e) {
     e.preventDefault();
-  
+
+    if (
+      !rutaInscripcion ||
+      !rutaCertificacion ||
+      !rutaServicioSocial ||
+      !rutaCartaAceptacion
+    ) {
+      alert("Por favor, sube todos los documentos requeridos.");
+      return;
+    }
+
+    const wAntecedentes = countWords(formData.antecedentesInstitucion);
+    if (wAntecedentes < MIN_ANTECEDENTES || wAntecedentes > MAX_ANTECEDENTES) {
+      alert("Los Antecedentes no cumplen con la métrica (200 a 350 palabras).");
+      return;
+    }
+
+    const wDescripcion = countWords(formData.descripcionEmpresa);
+    if (wDescripcion < MIN_DESCR_EMP || wDescripcion > MAX_DESCR_EMP) {
+      alert("La Descripción de la Empresa no cumple con la métrica (1200 a 1500 palabras).");
+      return;
+    }
+
+    const wActividades = countWordsArray(actividades);
+    if (wActividades < MIN_ACTIVIDADES || wActividades > MAX_ACTIVIDADES) {
+      alert("Las Actividades no cumplen con la métrica (550 a 650 palabras).");
+      return;
+    }
+
+    // const wAsesores = countWordsArray(formData.asesores);
+    // if (wAsesores < MIN_ASESORES || wAsesores > MAX_ASESORES) {
+    //   alert("Los Asesores Propuestos no cumplen con la métrica (100 a 200 palabras).");
+    //   return;
+    // }
+
     const jsonData = {
       trabajoGraduacion: {
-        titulo: formData.titulo,
+        titulo: formData.nombreEmpresa,
         descripcion: formData.descripcionEmpresa,
-        tipoTrabajo: "Pasantía", // Puedes hacerlo dinámico si es necesario
+        tipoTrabajo: "Pasantía",
         fechaInicio: formData.Fecha_inicio,
         fechaFin: formData.Fecha_fin,
         estado: "En espera",
@@ -106,17 +151,15 @@ const FormularioPasantia = () => {
       pasantia: {
         antecedentesInstitucion: formData.antecedentesInstitucion,
         descripcionEmpresa: formData.descripcionEmpresa,
-        actividades: actividades,
+        actividades,
         supervisor: {
           nombre: formData.supervisor.nombre,
           contacto: formData.supervisor.contacto,
           cargo: formData.supervisor.cargo,
         },
         asesoresPropuestos: formData.asesores
-          .filter((asesor) => asesor.trim() !== "") // Filtra asesores vacíos
-          .map((asesor) => ({
-            nombre: asesor,
-          })),
+          .filter((a) => a.trim() !== "")
+          .map((n) => ({ nombre: n })),
         cartaAceptacion: [
           {
             documento: rutaCartaAceptacion,
@@ -124,93 +167,56 @@ const FormularioPasantia = () => {
           },
         ],
         inscripcionTrabajoGraduacion: rutaInscripcion,
-        certificacionGlobalNotas: rutaCertificacion,
-        constanciaServicioSocial: rutaServicioSocial,
+        certificacion_global_notas: rutaCertificacion,
+        constancia_servicio_social: rutaServicioSocial,
       },
       asignacionEmpresa: {
         nombreEmpresa: formData.nombreEmpresa,
         contactoEmpresa: formData.contactoEmpresa,
         direccionEmpresa: formData.direccionEmpresa,
-        evaluacion: "En Revisión", // Estado inicial
+        evaluacion: "En Revisión",
       },
     };
-  
-  
-  
-    if (
-      !rutaInscripcion ||
-      !rutaCertificacion ||
-      !rutaServicioSocial ||
-      !rutaCartaAceptacion
-    ) {
-      alert("Por favor, asegúrate de subir todos los documentos requeridos.");
-      return;
-    }
-  
-    // Enviar al backend
+
     try {
-      const response = await authFetch(
-        `${API_URL}/api/pasantias/crear-completa`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`, // Incluye el token JWT aquí
-          },
-          body: JSON.stringify(jsonData),
-        }
-      );
-  
+      console.log(jsonData);
+      const response = await authFetch(`${API_URL}/api/pasantias/crear-completa`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify(jsonData),
+      });
       if (!response.ok) {
-        throw new Error("Error al enviar los datos al backend");
+        throw new Error("Error al enviar los datos.");
       }
-  
       const result = await response.json();
-      console.log("Respuesta del backend:", result);
-      console.log(result.trabajoGraduacion.id);
-  
-      // Realizar el segundo POST con el id del trabajo de graduación y el userId
-      const segundoPostResponse = await authFetch(
-        `${API_URL}/api/miembros-trabajo/add?trabajoId=${result.trabajoGraduacion.id}&usuarioId=${state.userId}`, 
+      const trabajoId = result.trabajoGraduacion.id;
+      const segundoPost = await authFetch(
+        `${API_URL}/api/miembros-trabajo/add?trabajoId=${trabajoId}&usuarioId=${userId}`,
         {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`
-          }
-          // Aquí ya no necesitas un cuerpo JSON.
+          headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
         }
       );
-      
-  
-      if (!segundoPostResponse.ok) {
-        throw new Error("Error al asociar el usuario al trabajo de graduación");
+      if (!segundoPost.ok) {
+        throw new Error("Error al asociar el usuario.");
       }
-  
-      const segundoResult = await segundoPostResponse.json();
-      console.log("Usuario asociado al trabajo de graduación:", segundoResult);
-  
-      alert("Formulario enviado correctamente y usuario asociado al trabajo.");
-    } catch (error) {
-      console.error("Error al enviar el formulario:", error);
-      alert(
-        "Hubo un problema al enviar el formulario. Por favor, intenta de nuevo."
-      );
+      alert("Formulario enviado correctamente y usuario asociado.");
+    } catch (err) {
+      alert("Error al procesar la solicitud. Por favor, intenta de nuevo.");
     }
-  };
-  
+  }
 
   return (
     <div className="form-container">
       <h2>Formulario de Pasantías</h2>
       <div className="tabs">
-        {steps.map((step, index) => (
+        {steps.map((s, i) => (
           <div
-            key={index}
-            className={`tab ${index === currentStep ? "active" : ""}`}
-            onClick={() => setCurrentStep(index)}
+            key={i}
+            className={`tab ${i === currentStep ? "active" : ""}`}
+            onClick={() => setCurrentStep(i)}
           >
-            {step}
+            {s}
           </div>
         ))}
       </div>
@@ -218,346 +224,310 @@ const FormularioPasantia = () => {
       <form onSubmit={handleSubmit}>
         {currentStep === 0 && (
           <div className="form-step">
-            <h3>{steps[0]}</h3>
-            <div className="form-group">
-              {/* <label>Nombre de la Empresa</label>
-              <input
-                type="text"
-                name="titulo"
-                value={formData.titulo}
-                onChange={handleChange}
-                required
-              /> */}
-              <label>Fecha de Inicio de la Pasantía</label>
-              <input
-                type="date"
-                name="Fecha_inicio"
-                value={formData.Fecha_inicio} // Usar valor del estado
-                onChange={handleChange} // Actualizar el estado
-                required
-              />
-              <label>Fecha de Finalización de la Pasantía</label>
-              <input
-                type="date"
-                name="Fecha_fin"
-                value={formData.Fecha_fin} // Usar valor del estado
-                onChange={handleChange} // Actualizar el estado
-                required
-              />
-            </div>
+            <label>Fecha de Inicio</label>
+            <p className="help-text">
+              Indica la fecha en la que iniciarás tu pasantía.
+            </p>
+            <input
+              type="date"
+              name="Fecha_inicio"
+              value={formData.Fecha_inicio}
+              onChange={handleChange}
+              required
+            />
+            <label>Fecha de Fin</label>
+            <p className="help-text">
+              Indica la fecha estimada de finalización de tu pasantía.
+            </p>
+            <input
+              type="date"
+              name="Fecha_fin"
+              value={formData.Fecha_fin}
+              onChange={handleChange}
+              required
+            />
           </div>
         )}
 
         {currentStep === 1 && (
           <div className="form-step">
-            <h3>{steps[1]}</h3>
-            <div className="form-group">
-              <label>Antecedentes de la Institución</label>
-              <textarea
-                name="antecedentesInstitucion"
-                value={formData.antecedentesInstitucion}
-                onChange={handleChange}
-                rows="5"
-                placeholder="Describe el impacto de la institución en palabras propias."
-                required
-              ></textarea>
-            </div>
+            <label>Antecedentes de la Institución (200 a 350 palabras)</label>
+            <p className="help-text">
+              Describe cómo la institución ha impactado ciertos temas o áreas.
+            </p>
+            <textarea
+              name="antecedentesInstitucion"
+              value={formData.antecedentesInstitucion}
+              onChange={handleChange}
+              rows="5"
+              required
+            />
+            <small>
+              Palabras: {countWords(formData.antecedentesInstitucion)} / {MIN_ANTECEDENTES} - {MAX_ANTECEDENTES}
+            </small>
           </div>
         )}
 
         {currentStep === 2 && (
           <div className="form-step">
-            <h3>{steps[2]}</h3>
-            <div className="form-group">
-              <label>Descripción General de la Empresa</label>
-              <textarea
-                name="descripcionEmpresa"
-                value={formData.descripcionEmpresa}
-                onChange={handleChange}
-                rows="5"
-                placeholder="Describe los departamentos, actividades, procesos, etc., en palabras propias."
-                required
-              ></textarea>
-            </div>
-            <div className="form-group">
-              <h4>Datos de la Empresa</h4>
-              {formData.empresaValidada ? (
-                // Mostrar datos si la empresa ya está validada
-                <div className="empresa-validada">
-                  <p>
-                    <strong>Nombre:</strong> {formData.nombreEmpresa}
-                  </p>
-                  <p>
-                    <strong>Contacto:</strong> {formData.contactoEmpresa}
-                  </p>
-                  <p>
-                    <strong>Dirección:</strong> {formData.direccionEmpresa}
-                  </p>
-                  <p>
-                    <strong>Estado de Validación:</strong>{" "}
-                    {formData.evaluacionEmpresa}
-                  </p>
-                </div>
-              ) : (
-                // Formulario para ingresar datos de una nueva empresa
-                <div>
-                  <div className="form-group">
-                    <label>Nombre de la Empresa</label>
-                    <input
-                      type="text"
-                      name="nombreEmpresa" // Atributo name correcto
-                      value={formData.nombreEmpresa} // Valor tomado del estado
-                      onChange={handleChange} // Manejador de cambios
-                      placeholder="Ingresa el nombre de la empresa"
-                      required
-                    />
-                  </div>
-                  <div className="form-group">
-                    <label>Contacto de la Empresa</label>
-                    <input
-                      type="text"
-                      name="contactoEmpresa"
-                      value={formData.contactoEmpresa}
-                      onChange={handleChange}
-                      placeholder="Ingresa el contacto de la empresa"
-                      required
-                    />
-                  </div>
-                  <div className="form-group">
-                    <label>Dirección de la Empresa</label>
-                    <textarea
-                      name="direccionEmpresa"
-                      value={formData.direccionEmpresa}
-                      onChange={handleChange}
-                      rows="3"
-                      placeholder="Ingresa la dirección de la empresa"
-                      required
-                    ></textarea>
-                  </div>
-                </div>
-              )}
-            </div>
+            <label>Descripción de la Empresa (1200 a 1500 palabras)</label>
+            <p className="help-text">
+              Explica los departamentos, áreas, procesos y mercado de la empresa donde realizarás la pasantía.
+            </p>
+            <textarea
+              name="descripcionEmpresa"
+              value={formData.descripcionEmpresa}
+              onChange={handleChange}
+              rows="6"
+              required
+            />
+            <small>
+              Palabras: {countWords(formData.descripcionEmpresa)} / {MIN_DESCR_EMP} - {MAX_DESCR_EMP}
+            </small>
+
+            <label>Nombre de la Empresa</label>
+            <p className="help-text">
+              Indica el nombre oficial de la empresa o institución.
+            </p>
+            <input
+              type="text"
+              name="nombreEmpresa"
+              value={formData.nombreEmpresa}
+              onChange={handleChange}
+              required
+            />
+
+            <label>Contacto de la Empresa</label>
+            <p className="help-text">
+              Persona o vía de contacto principal.
+            </p>
+            <input
+              type="text"
+              name="contactoEmpresa"
+              value={formData.contactoEmpresa}
+              onChange={handleChange}
+              required
+            />
+
+            <label>Dirección de la Empresa</label>
+            <p className="help-text">
+              Ubicación física de la empresa.
+            </p>
+            <textarea
+              name="direccionEmpresa"
+              value={formData.direccionEmpresa}
+              onChange={handleChange}
+              rows="2"
+              required
+            />
           </div>
         )}
 
         {currentStep === 3 && (
           <div className="form-step">
-            <h3>{steps[3]}</h3>
-            <div className="form-group">
-              <label>Actividades a Desarrollar</label>
-              {actividades.map((actividad, index) => (
-                <div key={index} className="dynamic-field">
-                  <input
-                    type="text"
-                    placeholder={`Actividad ${index + 1}`}
-                    value={actividad}
-                    onChange={(e) =>
-                      handleArrayChange(setActividades, index, e.target.value)
-                    }
-                    required
-                  />
-                  <button
-                    type="button"
-                    onClick={() => removeField(setActividades, index)}
-                  >
-                    -
-                  </button>
-                </div>
-              ))}
-              <button
-                type="button"
-                onClick={() => addField(setActividades, "")}
-              >
-                + Agregar Actividad
-              </button>
-            </div>
+            <label>Actividades a Desarrollar (550 a 650 palabras)</label>
+            <p className="help-text">
+              Lista las macro-actividades que realizarás y sus descripciones breves.
+            </p>
+            <small>
+              Palabras totales: {countWordsArray(actividades)} / {MIN_ACTIVIDADES} - {MAX_ACTIVIDADES}
+            </small>
+            {actividades.map((act, idx) => (
+              <div key={idx} style={{ marginBottom: "5px" }}>
+                <input
+                  type="text"
+                  value={act}
+                  onChange={(e) => handleArrayChange(setActividades, idx, e.target.value)}
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => removeField(setActividades, idx)}
+                  disabled={actividades.length <= 1}
+                >
+                  -
+                </button>
+              </div>
+            ))}
+            <button type="button" onClick={() => addField(setActividades, "")}>
+              + Agregar Actividad
+            </button>
           </div>
         )}
 
         {currentStep === 4 && (
           <div className="form-step">
-            <h3>{steps[4]}</h3>
-            <div className="form-group">
-              <label>Nombre del Supervisor</label>
-              <input
-                type="text"
-                name="supervisor.nombre"
-                value={formData.supervisor.nombre}
-                onChange={handleChange}
-                required
-              />
-            </div>
-            <div className="form-group">
-              <label>Cargo del Supervisor</label>
-              <input
-                type="text"
-                name="cargo"
-                value={formData.supervisor.cargo}
-                onChange={(e) =>
-                  handleChange({
-                    target: { name: "supervisor.cargo", value: e.target.value },
-                  })
-                }
-                required
-              />
-            </div>
-            <div className="form-group">
-              <label>Contacto del Supervisor</label>
-              <input
-                type="text"
-                name="contacto"
-                value={formData.supervisor.contacto}
-                onChange={(e) =>
-                  handleChange({
-                    target: {
-                      name: "supervisor.contacto",
-                      value: e.target.value,
-                    },
-                  })
-                }
-                required
-              />
-            </div>
+            <label>Datos del Supervisor Empresarial</label>
+            <p className="help-text">
+              Ingresa la información de contacto y cargo del supervisor designado.
+            </p>
+            <label>Nombre del Supervisor</label>
+            <input
+              type="text"
+              name="supervisor.nombre"
+              value={formData.supervisor.nombre}
+              onChange={handleChange}
+              required
+            />
+            <label>Cargo del Supervisor</label>
+            <input
+              type="text"
+              name="supervisor.cargo"
+              value={formData.supervisor.cargo}
+              onChange={handleChange}
+              required
+            />
+            <label>Contacto del Supervisor</label>
+            <input
+              type="text"
+              name="supervisor.contacto"
+              value={formData.supervisor.contacto}
+              onChange={handleChange}
+              required
+            />
           </div>
         )}
 
         {currentStep === 5 && (
           <div className="form-step">
-            <h3>{steps[5]}</h3>
-            <div className="form-group">
-              <label>Asesores Propuestos</label>
-              {formData.asesores.map((asesor, index) => (
-                <div key={index} className="dynamic-field">
-                  <input
-                    type="text"
-                    value={asesor}
-                    placeholder={`Asesor ${index + 1}`}
-                    onChange={(e) =>
-                      setFormData((prev) => ({
-                        ...prev,
-                        asesores: prev.asesores.map((a, i) =>
-                          i === index ? e.target.value : a
-                        ), // Actualiza el índice correspondiente
-                      }))
-                    }
-                    required
-                  />
-                  <button
-                    type="button"
-                    onClick={() =>
-                      setFormData((prev) => ({
-                        ...prev,
-                        asesores: prev.asesores.filter((_, i) => i !== index), // Elimina el índice correspondiente
-                      }))
-                    }
-                    disabled={formData.asesores.length <= 1} // No permite eliminar si queda solo uno
-                  >
-                    -
-                  </button>
-                </div>
-              ))}
-
-              {/* Botón para agregar un nuevo asesor */}
-              <button
-                type="button"
-                onClick={() => {
-                  if (formData.asesores.length < 3) {
+            <label>Asesores Propuestos (100 a 200 palabras)</label>
+            <p className="help-text">
+              Lista el/los asesores que propones para tu pasantía (máx 3). 
+            </p>
+           
+            {formData.asesores.map((asesor, i) => (
+              <div key={i} style={{ marginBottom: "5px" }}>
+                <input
+                  type="text"
+                  value={asesor}
+                  onChange={(e) =>
                     setFormData((prev) => ({
                       ...prev,
-                      asesores: [...prev.asesores, ""], // Agrega un nuevo asesor vacío
-                    }));
-                  } else {
-                    alert("Solo puedes agregar hasta 3 asesores.");
+                      asesores: prev.asesores.map((a, ix) =>
+                        ix === i ? e.target.value : a
+                      ),
+                    }))
                   }
-                }}
-                disabled={formData.asesores.length >= 3} // Deshabilita el botón si ya hay 3 asesores
-              >
-                + Agregar Asesor
-              </button>
-            </div>
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      asesores: prev.asesores.filter((_, ix) => ix !== i),
+                    }))
+                  }
+                  disabled={formData.asesores.length <= 1}
+                >
+                  -
+                </button>
+              </div>
+            ))}
+            <button
+              type="button"
+              onClick={() => {
+                if (formData.asesores.length < 3) {
+                  setFormData((prev) => ({
+                    ...prev,
+                    asesores: [...prev.asesores, ""],
+                  }));
+                } else {
+                  alert("Máximo 3 asesores.");
+                }
+              }}
+              disabled={formData.asesores.length >= 3}
+            >
+              + Agregar Asesor
+            </button>
           </div>
         )}
 
-{currentStep === 6 && (
-  <div className="form-step">
-    <h3>{steps[6]}</h3>
-    <div className="form-group">
-      <h4>Subir Documentos</h4>
+        {currentStep === 6 && (
+          <div className="form-step">
+            <h4>Documentos de Soporte</h4>
 
-      {/* Inscripción de trabajo de graduación */}
-      <h6>Inscripción de trabajo de graduación</h6>
-      <FileUpload
-        fileName="inscripcion_trabajo_graduacion"
-        initialUploaded={archivosSubidos["inscripcion_trabajo_graduacion"]}
-        onSuccess={(ruta) => {
-          setRutaInscripcion(ruta);
-          setArchivosSubidos((prev) => ({
-            ...prev,
-            inscripcion_trabajo_graduacion: true,
-          }));
-        }}
-      />
-      {rutaInscripcion && <p>Ruta: {rutaInscripcion}</p>}
+            <label>Inscripción de Trabajo de Graduación</label>
+            <p className="help-text">
+              Sube la impresión o archivo que demuestre la inscripción.
+            </p>
+            <FileUpload
+              fileName="inscripcion_trabajo_graduacion"
+              initialUploaded={archivosSubidos["inscripcion_trabajo_graduacion"]}
+              onSuccess={(ruta) => {
+                setRutaInscripcion(ruta);
+                setArchivosSubidos((p) => ({
+                  ...p,
+                  inscripcion_trabajo_graduacion: true,
+                }));
+              }}
+            />
+            {rutaInscripcion && <p>{rutaInscripcion}</p>}
 
-      {/* Certificación Global de Notas */}
-      <h6>Certificación Global de Notas</h6>
-      <FileUpload
-        fileName="certificacion_global_notas"
-        initialUploaded={archivosSubidos["certificacion_global_notas"]}
-        onSuccess={(ruta) => {
-          setRutaCertificacion(ruta);
-          setArchivosSubidos((prev) => ({
-            ...prev,
-            certificacion_global_notas: true,
-          }));
-        }}
-      />
-      {rutaCertificacion && <p>Ruta: {rutaCertificacion}</p>}
+            <label>Certificación Global de Notas</label>
+            <p className="help-text">
+              Sube la copia de tu certificación global de notas.
+            </p>
+            <FileUpload
+              fileName="certificacion_global_notas"
+              initialUploaded={archivosSubidos["certificacion_global_notas"]}
+              onSuccess={(ruta) => {
+                setRutaCertificacion(ruta);
+                setArchivosSubidos((p) => ({
+                  ...p,
+                  certificacion_global_notas: true,
+                }));
+              }}
+            />
+            {rutaCertificacion && <p>{rutaCertificacion}</p>}
 
-      {/* Constancia de servicio social */}
-      <h6>Constancia de servicio social</h6>
-      <FileUpload
-        fileName="constancia_servicio_social"
-        initialUploaded={archivosSubidos["constancia_servicio_social"]}
-        onSuccess={(ruta) => {
-          setRutaServicioSocial(ruta);
-          setArchivosSubidos((prev) => ({
-            ...prev,
-            constancia_servicio_social: true,
-          }));
-        }}
-      />
-      {rutaServicioSocial && <p>Ruta: {rutaServicioSocial}</p>}
+            <label>Constancia de Servicio Social</label>
+            <p className="help-text">
+              Sube la constancia emitida por decanato.
+            </p>
+            <FileUpload
+              fileName="constancia_servicio_social"
+              initialUploaded={archivosSubidos["constancia_servicio_social"]}
+              onSuccess={(ruta) => {
+                setRutaServicioSocial(ruta);
+                setArchivosSubidos((p) => ({
+                  ...p,
+                  constancia_servicio_social: true,
+                }));
+              }}
+            />
+            {rutaServicioSocial && <p>{rutaServicioSocial}</p>}
 
-      {/* Carta de Aceptación */}
-      <h6>Carta de Aceptación</h6>
-      <FileUpload
-        fileName="carta_aceptacion"
-        initialUploaded={archivosSubidos["carta_aceptacion"]}
-        onSuccess={(ruta) => {
-          setRutaCartaAceptacion(ruta);
-          setArchivosSubidos((prev) => ({
-            ...prev,
-            carta_aceptacion: true,
-          }));
-        }}
-      />
-      {rutaCartaAceptacion && <p>Ruta: {rutaCartaAceptacion}</p>}
+            <label>Carta de Aceptación</label>
+            <p className="help-text">
+              Sube la carta firmada por el representante legal o RRHH.
+            </p>
+            <FileUpload
+              fileName="carta_aceptacion"
+              initialUploaded={archivosSubidos["carta_aceptacion"]}
+              onSuccess={(ruta) => {
+                setRutaCartaAceptacion(ruta);
+                setArchivosSubidos((p) => ({
+                  ...p,
+                  carta_aceptacion: true,
+                }));
+              }}
+            />
+            {rutaCartaAceptacion && <p>{rutaCartaAceptacion}</p>}
 
-      {/* Fecha de Aceptación */}
-      <label>Fecha de Aceptación</label>
-      <input
-        type="date"
-        name="cartaAceptacionFecha"
-        value={formData.cartaAceptacionFecha || ""}
-        onChange={handleChange}
-        required
-      />
-    </div>
-  </div>
-)}
-
-
+            <label>Fecha de Aceptación</label>
+            <p className="help-text">
+              Indica la fecha en que se emitió la carta de aceptación.
+            </p>
+            <input
+              type="date"
+              name="cartaAceptacionFecha"
+              value={formData.cartaAceptacionFecha}
+              onChange={handleChange}
+              required
+            />
+          </div>
+        )}
 
         <div className="navigation-buttons">
           {currentStep > 0 && (
@@ -577,6 +547,6 @@ const FormularioPasantia = () => {
       </form>
     </div>
   );
-};
+}
 
 export default FormularioPasantia;

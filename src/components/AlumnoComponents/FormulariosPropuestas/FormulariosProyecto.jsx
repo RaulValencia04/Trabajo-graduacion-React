@@ -3,13 +3,24 @@ import FileUpload from "../../docs/FileUpload";
 import "./FormulariosPropuestas.css";
 import { AuthContext } from "../../Auth/Context/AuthContext";
 import { useNavigate } from "react-router-dom";
-import {useApi} from "../../Auth/Helpers/api"
+import { useApi } from "../../Auth/Helpers/api";
 
 export default function FormulariosProyecto() {
   const API_URL = process.env.REACT_APP_API_URL;
   const { state } = useContext(AuthContext);
   const { token, userId } = state;
   const { authFetch } = useApi();
+  const navigate = useNavigate();
+
+  function countWords(text) {
+    return text.trim().split(/\s+/).filter(Boolean).length;
+  }
+
+  const MAX_DESC_TRABAJO = 900;
+  const MAX_PROBLEMA = 900;
+  const MAX_JUSTIFICACION = 900;
+  const MAX_ALCANCE = 300;
+  const MAX_DESCR_OBJETIVOS = 900;
 
   const [trabajoData, setTrabajoData] = useState({
     titulo: "",
@@ -19,6 +30,7 @@ export default function FormulariosProyecto() {
     fechaFin: "",
     estado: "En espera",
   });
+
   const [correosExtras, setCorreosExtras] = useState({
     uno: "",
     dos: "",
@@ -33,26 +45,23 @@ export default function FormulariosProyecto() {
     metodologia: "",
     entregables: [""],
     cronograma: [{ actividad: "", fechaInicio: "", fechaFin: "" }],
-    actores: [""],
-    asesoresPropuestos: [{ nombre: "" }], // Inicializa con un asesor vacío
-    cartaAceptacion: [
-      {
-        documento: "",
-        fecha: "",
-      },
-    ],
+    actores: {
+      patrocinador: { nombre: "", descripcion: "" },
+      beneficiario: { nombre: "", descripcion: "" },
+      ejecutor: { nombre: "", descripcion: "" },
+      financista: { nombre: "", descripcion: "" },
+    },
+    asesoresPropuestos: [{ nombre: "" }],
+    cartaAceptacion: [{ documento: "", fecha: "" }],
     inscripcionTrabajoGraduacion: "",
     certificacionGlobalNotas: "",
     constanciaServicioSocial: "",
   });
-  
 
   const [rutaInscripcion, setRutaInscripcion] = useState(null);
   const [rutaCertificacion, setRutaCertificacion] = useState(null);
   const [rutaServicioSocial, setRutaServicioSocial] = useState(null);
   const [rutaCartaAceptacion, setRutaCartaAceptacion] = useState(null);
-
-  const [currentStep, setCurrentStep] = useState(0);
 
   const [archivosSubidos, setArchivosSubidos] = useState({
     carta_aceptacion: false,
@@ -61,6 +70,7 @@ export default function FormulariosProyecto() {
     constancia_servicio_social: false,
   });
 
+  const [currentStep, setCurrentStep] = useState(0);
   const steps = [
     "Trabajo de Graduación",
     "Datos del Proyecto",
@@ -70,62 +80,75 @@ export default function FormulariosProyecto() {
     "Documentos",
   ];
 
-  const navigate = useNavigate();
-
-  const nextStep = () =>
+  function nextStep() {
     setCurrentStep((prev) => Math.min(prev + 1, steps.length - 1));
-  const prevStep = () => setCurrentStep((prev) => Math.max(prev - 1, 0));
+  }
 
-  const handleTrabajoChange = (e) => {
+  function prevStep() {
+    setCurrentStep((prev) => Math.max(prev - 1, 0));
+  }
+
+  function handleTrabajoChange(e) {
     const { name, value } = e.target;
-    setTrabajoData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
+    setTrabajoData((prev) => ({ ...prev, [name]: value }));
+  }
 
-  const handleProyectoChange = (e) => {
+  function handleProyectoChange(e) {
     const { name, value } = e.target;
-    setProyectoData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
+    setProyectoData((prev) => ({ ...prev, [name]: value }));
+  }
 
-  
-
- 
-
-  const handleCartaAceptacionChange = (field, value, index = 0) => {
+  function handleCartaAceptacionChange(field, value, index = 0) {
     setProyectoData((prev) => {
       const updated = [...prev.cartaAceptacion];
       updated[index] = { ...updated[index], [field]: value };
       return { ...prev, cartaAceptacion: updated };
     });
-  };
+  }
 
- 
-
-  const handleSubmit = async (e) => {
+  async function handleSubmit(e) {
     e.preventDefault();
-  
+
     if (
       !rutaInscripcion ||
       !rutaCertificacion ||
       !rutaServicioSocial ||
       !rutaCartaAceptacion
     ) {
-      alert("Por favor, asegúrate de subir todos los documentos requeridos.");
+      alert(
+        "Por favor, sube todos los documentos requeridos (Inscripción, Certificación, Constancia y Carta)."
+      );
       return;
     }
-  
-    const jsonData = {
+
+    if (countWords(trabajoData.descripcion) > MAX_DESC_TRABAJO) {
+      alert("La descripción del trabajo excede el máximo de 900 palabras.");
+      return;
+    }
+    if (countWords(proyectoData.problema) > MAX_PROBLEMA) {
+      alert("El 'Problema' excede el máximo de 900 palabras.");
+      return;
+    }
+    if (countWords(proyectoData.justificacion) > MAX_JUSTIFICACION) {
+      alert("La 'Justificación' excede el máximo de 900 palabras.");
+      return;
+    }
+    if (countWords(proyectoData.alcance) > MAX_ALCANCE) {
+      alert("El 'Alcance' excede el máximo de 300 palabras.");
+      return;
+    }
+    if (countWords(proyectoData.descripcionObjetivos) > MAX_DESCR_OBJETIVOS) {
+      alert("La 'Descripción de Objetivos' excede el máximo de 900 palabras.");
+      return;
+    }
+
+    const bodyData = {
       trabajoGraduacion: {
         titulo: trabajoData.titulo.trim(),
         descripcion: trabajoData.descripcion.trim(),
         tipoTrabajo: trabajoData.tipoTrabajo,
-        fechaInicio: trabajoData.fechaInicio, // Asegúrate que no sea vacío
-        fechaFin: trabajoData.fechaFin,       // Asegúrate que no sea vacío
+        fechaInicio: trabajoData.fechaInicio,
+        fechaFin: trabajoData.fechaFin,
         estado: trabajoData.estado,
       },
       proyecto: {
@@ -134,34 +157,47 @@ export default function FormulariosProyecto() {
         alcance: proyectoData.alcance.trim(),
         objetivos: proyectoData.objetivos.filter((o) => o.trim() !== ""),
         descripcionObjetivos: proyectoData.descripcionObjetivos.trim(),
-        metodologia: proyectoData.metodologia, // Metodología vacía si no es necesaria
-        entregables: proyectoData.entregables.filter((e) => e.trim() !== ""), // Array vacío si no es necesario
+        metodologia: proyectoData.metodologia,
+        entregables: proyectoData.entregables.filter((e) => e.trim() !== ""),
         cronograma: proyectoData.cronograma.map((c) => ({
           actividad: c.actividad.trim(),
-          fechaInicio: c.fechaInicio, // Validar fechas antes de enviar
+          fechaInicio: c.fechaInicio,
           fechaFin: c.fechaFin,
         })),
-        actores: proyectoData.actores.filter((a) => a.trim() !== ""),
+        // Aquí pasas el objeto actores completo
+        actores: {
+          patrocinador: {
+            nombre: proyectoData.actores.patrocinador.nombre.trim(),
+            descripcion: proyectoData.actores.patrocinador.descripcion.trim(),
+          },
+          beneficiario: {
+            nombre: proyectoData.actores.beneficiario.nombre.trim(),
+            descripcion: proyectoData.actores.beneficiario.descripcion.trim(),
+          },
+          ejecutor: {
+            nombre: proyectoData.actores.ejecutor.nombre.trim(),
+            descripcion: proyectoData.actores.ejecutor.descripcion.trim(),
+          },
+          financista: {
+            nombre: proyectoData.actores.financista.nombre.trim(),
+            descripcion: proyectoData.actores.financista.descripcion.trim(),
+          },
+        },
         asesoresPropuestos: proyectoData.asesoresPropuestos
-          .filter((asesor) => asesor.nombre.trim() !== "") // Filtrar asesores vacíos
-          .map((asesor) => ({
-            nombre: asesor.nombre.trim(), // Solo se necesita el nombre
-          })),
+          .filter((asesor) => asesor.nombre.trim() !== "")
+          .map((asesor) => ({ nombre: asesor.nombre.trim() })),
         cartaAceptacion: [
           {
             documento: rutaCartaAceptacion,
-            fecha: proyectoData.cartaAceptacion[0].fecha, // Fecha en formato YYYY-MM-DD
+            fecha: proyectoData.cartaAceptacion[0].fecha,
           },
         ],
         inscripcionTrabajoGraduacion: rutaInscripcion,
-        certificacionGlobalNotas: rutaCertificacion,
+        certificacion_global_notas: rutaCertificacion,
         constanciaServicioSocial: rutaServicioSocial,
       },
     };
-    
-    
-  
-  
+
     try {
       const response = await authFetch(
         `${API_URL}/api/proyectos/crear-completo`,
@@ -171,23 +207,16 @@ export default function FormulariosProyecto() {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
           },
-          body: JSON.stringify(jsonData),
+          body: JSON.stringify(bodyData),
         }
       );
-  
       if (!response.ok) {
-        const errorText = await response.text();
-        console.error("Error al enviar los datos:", errorText);
         throw new Error("Error al enviar los datos al backend");
       }
-  
       const result = await response.json();
-      console.log("Respuesta del backend:", result);
-  
-      // Segundo POST para asociar el usuario al trabajo de graduación
       const trabajoId = result.trabajoGraduacion.id;
-      const segundoPostResponse = await authFetch(
-        `${API_URL}/miembros-trabajo/add?trabajoId=${trabajoId}&usuarioId=${userId}`,
+      const segundoPost = await authFetch(
+        `${API_URL}/api/miembros-trabajo/add?trabajoId=${trabajoId}&usuarioId=${userId}`,
         {
           method: "POST",
           headers: {
@@ -196,36 +225,45 @@ export default function FormulariosProyecto() {
           },
         }
       );
-  
-      if (!segundoPostResponse.ok) {
-        const errorText = await segundoPostResponse.text();
-        console.error("Error al asociar usuario:", errorText);
+      const correosValidos = [correosExtras.uno, correosExtras.dos].filter(
+        (correo) => correo.trim() !== ""
+      );
+      
+      for (const correo of correosValidos) {
+        const extraPost = await authFetch(
+          `${API_URL}/api/miembros-trabajo/add-by-email?trabajoId=${trabajoId}&correo=${encodeURIComponent(correo)}`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+      
+        if (!extraPost.ok) {
+          console.error(`Error al agregar el correo ${correo} como miembro.`);
+        }
+      }
+      if (!segundoPost.ok) {
         throw new Error("Error al asociar el usuario al trabajo de graduación");
       }
-  
-      const segundoResult = await segundoPostResponse.json();
-      console.log("Usuario asociado al trabajo de graduación:", segundoResult);
-  
-      alert("Formulario enviado correctamente y usuario asociado al trabajo.");
+      alert("Formulario enviado y usuario asociado correctamente.");
       navigate("/inicio");
-    } catch (error) {
-      console.error("Error al enviar el formulario:", error.message);
-      alert(
-        "Hubo un problema al enviar el formulario. Por favor, intenta de nuevo."
-      );
+    } catch (err) {
+      alert("Ocurrió un error al enviar el formulario. Intenta de nuevo.");
     }
-  };
-  
+  }
 
   return (
     <div className="form-container">
       <h2>Formulario de Proyecto</h2>
       <div className="tabs">
-        {steps.map((step, index) => (
+        {steps.map((step, idx) => (
           <div
-            key={index}
-            className={`tab ${index === currentStep ? "active" : ""}`}
-            onClick={() => setCurrentStep(index)}
+            key={idx}
+            className={`tab ${idx === currentStep ? "active" : ""}`}
+            onClick={() => setCurrentStep(idx)}
           >
             {step}
           </div>
@@ -233,367 +271,522 @@ export default function FormulariosProyecto() {
       </div>
 
       <form onSubmit={handleSubmit}>
-        {/* Paso 0: Datos del Trabajo de Graduación */}
         {currentStep === 0 && (
           <div className="form-step">
-            <h3>{steps[0]}</h3>
-            <div className="form-group">
-              <label>Título</label>
-              <input
-                type="text"
-                name="titulo"
-                value={trabajoData.titulo}
-                onChange={handleTrabajoChange}
-                required
-              />
-            </div>
-            <div className="form-group">
-              <label>Descripción</label>
-              <textarea
-                name="descripcion"
-                value={trabajoData.descripcion}
-                onChange={handleTrabajoChange}
-                rows="5"
-                required
-              ></textarea>
-            </div>
-            <div className="form-group">
-              <label>Fecha de Inicio</label>
-              <input
-                type="date"
-                name="fechaInicio"
-                value={trabajoData.fechaInicio}
-                onChange={handleTrabajoChange}
-                required
-              />
-            </div>
-            <div className="form-group">
-              <label>Fecha de Fin</label>
-              <input
-                type="date"
-                name="fechaFin"
-                value={trabajoData.fechaFin}
-                onChange={handleTrabajoChange}
-                required
-              />
-            </div>
+            <label>Título</label>
+            <p className="help-text">
+              Escribe el nombre oficial de tu proyecto.
+            </p>
+            <input
+              type="text"
+              name="titulo"
+              value={trabajoData.titulo}
+              onChange={handleTrabajoChange}
+              required
+            />
+
+            <label>Descripción (máx 900 palabras)</label>
+            <p className="help-text">
+              Breve introducción o descripción general de tu proyecto.
+            </p>
+            <textarea
+              name="descripcion"
+              rows="5"
+              value={trabajoData.descripcion}
+              onChange={handleTrabajoChange}
+              required
+            />
+            <small>
+              Palabras: {countWords(trabajoData.descripcion)} /{" "}
+              {MAX_DESC_TRABAJO}
+            </small>
+
+            <label>Fecha de Inicio</label>
+            <p className="help-text">
+              Indica cuándo iniciarás oficialmente tu proyecto.
+            </p>
+            <input
+              type="date"
+              name="fechaInicio"
+              value={trabajoData.fechaInicio}
+              onChange={handleTrabajoChange}
+              required
+            />
+
+            <label>Fecha de Fin</label>
+            <p className="help-text">
+              Estimación de finalización (fecha límite).
+            </p>
+            <input
+              type="date"
+              name="fechaFin"
+              value={trabajoData.fechaFin}
+              onChange={handleTrabajoChange}
+              required
+            />
           </div>
         )}
 
-        {/* Paso 1: Datos del Proyecto */}
         {currentStep === 1 && (
           <div className="form-step">
-            <h3>{steps[1]}</h3>
-            <div className="form-group">
-              <label>Problema</label>
-              <textarea
-                name="problema"
-                value={proyectoData.problema}
-                onChange={handleProyectoChange}
-                rows="5"
-                required
-              ></textarea>
-            </div>
-            <div className="form-group">
-              <label>Justificación</label>
-              <textarea
-                name="justificacion"
-                value={proyectoData.justificacion}
-                onChange={handleProyectoChange}
-                rows="5"
-                required
-              ></textarea>
-            </div>
-            <div className="form-group">
-              <label>Alcance</label>
-              <textarea
-                name="alcance"
-                value={proyectoData.alcance}
-                onChange={handleProyectoChange}
-                rows="5"
-                required
-              ></textarea>
-            </div>
+            <label>Descripción del problema (máx 900)</label>
+            <p className="help-text">
+              Explica detalladamente el problema o la oportunidad que se
+              abordará.
+            </p>
+            <textarea
+              name="problema"
+              rows="4"
+              value={proyectoData.problema}
+              onChange={handleProyectoChange}
+              required
+            />
+            <small>
+              Palabras: {countWords(proyectoData.problema)} / {MAX_PROBLEMA}
+            </small>
+
+            <label>Justificación (máx 900)</label>
+            <p className="help-text">
+              ¿Por qué es importante este proyecto? Beneficios y relevancia.
+            </p>
+            <textarea
+              name="justificacion"
+              rows="4"
+              value={proyectoData.justificacion}
+              onChange={handleProyectoChange}
+              required
+            />
+            <small>
+              Palabras: {countWords(proyectoData.justificacion)} /{" "}
+              {MAX_JUSTIFICACION}
+            </small>
+
+            <label>Alcance (máx 300)</label>
+            <p className="help-text">
+              Define el alcance específico de tu proyecto (qué incluye y hasta
+              dónde llega).
+            </p>
+            <textarea
+              name="alcance"
+              rows="3"
+              value={proyectoData.alcance}
+              onChange={handleProyectoChange}
+              required
+            />
+            <small>
+              Palabras: {countWords(proyectoData.alcance)} / {MAX_ALCANCE}
+            </small>
           </div>
         )}
 
-        {/* Paso 2: Objetivos */}
         {currentStep === 2 && (
           <div className="form-step">
-            <h3>{steps[2]}</h3>
-            <div className="form-group">
-              <label>Descripción de Objetivos</label>
-              <textarea
-                name="descripcionObjetivos"
-                value={proyectoData.descripcionObjetivos}
-                onChange={handleProyectoChange}
-                rows="4"
-                required
-              ></textarea>
-            </div>
-            <div className="form-group">
-              <label>Objetivos</label>
-              {proyectoData.objetivos.map((obj, index) => (
-                <div key={index} className="dynamic-field">
-                  <input
-                    type="text"
-                    value={obj}
-                    placeholder={`Objetivo ${index + 1}`}
-                    onChange={(e) =>
-                      setProyectoData((prev) => ({
-                        ...prev,
-                        objetivos: prev.objetivos.map((o, i) =>
-                          i === index ? e.target.value : o
-                        ),
-                      }))
-                    }
-                    required
-                  />
-                  <button
-                    type="button"
-                    onClick={() =>
-                      setProyectoData((prev) => ({
-                        ...prev,
-                        objetivos: prev.objetivos.filter((_, i) => i !== index),
-                      }))
-                    }
-                    disabled={proyectoData.objetivos.length <= 1}
-                  >
-                    -
-                  </button>
-                </div>
-              ))}
-              <button
-                type="button"
-                onClick={() =>
-                  setProyectoData((prev) => ({
-                    ...prev,
-                    objetivos: [...prev.objetivos, ""],
-                  }))
-                }
-              >
-                + Agregar Objetivo
-              </button>
-            </div>
+            <label>Descripción Narrativa de Objetivos (máx 900)</label>
+            <p className="help-text">
+              Explica cada objetivo, por qué es importante y cómo se abordará.
+            </p>
+            <textarea
+              name="descripcionObjetivos"
+              rows="4"
+              value={proyectoData.descripcionObjetivos}
+              onChange={handleProyectoChange}
+              required
+            />
+            <small>
+              Palabras: {countWords(proyectoData.descripcionObjetivos)} /{" "}
+              {MAX_DESCR_OBJETIVOS}
+            </small>
+
+            <label>Objetivos (lista)</label>
+            <p className="help-text">
+              Indica al menos 4 objetivos específicos (puedes tener hasta 6).
+            </p>
+            {proyectoData.objetivos.map((obj, idx) => (
+              <div key={idx} style={{ marginBottom: "5px" }}>
+                <input
+                  type="text"
+                  placeholder={`Objetivo ${idx + 1}`}
+                  value={obj}
+                  onChange={(e) =>
+                    setProyectoData((prev) => ({
+                      ...prev,
+                      objetivos: prev.objetivos.map((o, i) =>
+                        i === idx ? e.target.value : o
+                      ),
+                    }))
+                  }
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() =>
+                    setProyectoData((prev) => ({
+                      ...prev,
+                      objetivos: prev.objetivos.filter((_, i) => i !== idx),
+                    }))
+                  }
+                  disabled={proyectoData.objetivos.length <= 1}
+                >
+                  -
+                </button>
+              </div>
+            ))}
+            <button
+              type="button"
+              onClick={() =>
+                setProyectoData((prev) => ({
+                  ...prev,
+                  objetivos: [...prev.objetivos, ""],
+                }))
+              }
+            >
+              + Agregar Objetivo
+            </button>
           </div>
         )}
 
-        {/* Paso 3: Metodología y Entregables */}
-{/* Paso 3: Metodología, Entregables y Asesores Propuestos */}
-{currentStep === 3 && (
-  <div className="form-step">
-    <h3>{steps[3]}</h3>
-    <div className="form-group">
-      <label>Alumnos Encargados de Desarrollar el Proyecto</label>
-      <p>
-        Nota: Si usted es el único que realizará el proyecto, debe dejar
-        los espacios vacíos.
-      </p>
-      <input
-        type="text"
-        placeholder="ejemplo.correo@catolica.edu.sv"
-        value={correosExtras.uno}
-        onChange={(e) =>
-          setCorreosExtras((prev) => ({ ...prev, uno: e.target.value }))
-        }
-      />
-      <input
-        type="text"
-        placeholder="ejemplo.correo@catolica.edu.sv"
-        value={correosExtras.dos}
-        onChange={(e) =>
-          setCorreosExtras((prev) => ({ ...prev, dos: e.target.value }))
-        }
-      />
-    </div>
+        {currentStep === 3 && (
+          <div className="form-step">
+            <label>Alumnos Encargados (Correos)</label>
+            <p className="help-text">
+              Si eres el único, deja estos campos vacíos. Si hay otros alumnos,
+              ingresa sus correos.
+            </p>
+            <input
+              type="text"
+              placeholder="ejemplo1@catolica.edu.sv"
+              value={correosExtras.uno}
+              onChange={(e) =>
+                setCorreosExtras((prev) => ({ ...prev, uno: e.target.value }))
+              }
+            />
+            <input
+              type="text"
+              placeholder="ejemplo2@catolica.edu.sv"
+              value={correosExtras.dos}
+              onChange={(e) =>
+                setCorreosExtras((prev) => ({ ...prev, dos: e.target.value }))
+              }
+            />
 
-    {/* Asesores Propuestos */}
-    <div className="form-group">
-      <label>Asesores Propuestos</label>
-      {proyectoData.asesoresPropuestos?.map((asesor, index) => (
-        <div key={index} className="dynamic-field">
-          <input
-            type="text"
-            value={asesor.nombre || ""}
-            placeholder={`Asesor ${index + 1}`}
-            onChange={(e) =>
-              setProyectoData((prev) => ({
-                ...prev,
-                asesoresPropuestos: prev.asesoresPropuestos.map((a, i) =>
-                  i === index ? { ...a, nombre: e.target.value } : a
-                ),
-              }))
-            }
-            required
-          />
-          <button
-            type="button"
-            onClick={() =>
-              setProyectoData((prev) => ({
-                ...prev,
-                asesoresPropuestos: prev.asesoresPropuestos.filter(
-                  (_, i) => i !== index
-                ),
-              }))
-            }
-            disabled={proyectoData.asesoresPropuestos.length <= 1} // Evita eliminar si queda solo uno
-          >
-            -
-          </button>
-        </div>
-      ))}
-      <button
-        type="button"
-        onClick={() =>
-          setProyectoData((prev) => ({
-            ...prev,
-            asesoresPropuestos: [
-              ...prev.asesoresPropuestos,
-              { nombre: "" },
-            ], // Agrega un nuevo asesor vacío
-          }))
-        }
-        disabled={proyectoData.asesoresPropuestos.length >= 3} // Limita a 3 asesores
-      >
-        + Agregar Asesor
-      </button>
-      {proyectoData.asesoresPropuestos.length >= 3 && (
-        <p style={{ color: "red" }}>Solo puedes agregar hasta 3 asesores.</p>
-      )}
-    </div>
-  </div>
-)}
+            <label>Asesores Propuestos</label>
+            <p className="help-text">
+              Máximo 3 asesores. Agrega sus nombres completos.
+            </p>
+            {proyectoData.asesoresPropuestos.map((asesor, index) => (
+              <div key={index} style={{ marginBottom: "5px" }}>
+                <input
+                  type="text"
+                  placeholder={`Asesor ${index + 1}`}
+                  value={asesor.nombre}
+                  onChange={(e) =>
+                    setProyectoData((prev) => ({
+                      ...prev,
+                      asesoresPropuestos: prev.asesoresPropuestos.map((a, i) =>
+                        i === index ? { ...a, nombre: e.target.value } : a
+                      ),
+                    }))
+                  }
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() =>
+                    setProyectoData((prev) => ({
+                      ...prev,
+                      asesoresPropuestos: prev.asesoresPropuestos.filter(
+                        (_, i) => i !== index
+                      ),
+                    }))
+                  }
+                  disabled={proyectoData.asesoresPropuestos.length <= 1}
+                >
+                  -
+                </button>
+              </div>
+            ))}
+            <button
+              type="button"
+              onClick={() => {
+                if (proyectoData.asesoresPropuestos.length < 3) {
+                  setProyectoData((prev) => ({
+                    ...prev,
+                    asesoresPropuestos: [
+                      ...prev.asesoresPropuestos,
+                      { nombre: "" },
+                    ],
+                  }));
+                } else {
+                  alert("Máximo 3 asesores.");
+                }
+              }}
+              disabled={proyectoData.asesoresPropuestos.length >= 3}
+            >
+              + Agregar Asesor
+            </button>
+          </div>
+        )}
 
-
-
-        {/* Paso 5: Actores y Carta Aceptación */}
         {currentStep === 4 && (
           <div className="form-step">
-            <h3>{steps[4]}</h3>
-            <div className="form-group">
-              <label>Actores</label>
-              {proyectoData.actores.map((actor, index) => (
-                <div key={index} className="dynamic-field">
-                  <input
-                    type="text"
-                    placeholder={`Actor ${index + 1}`}
-                    value={actor}
-                    onChange={(e) =>
-                      setProyectoData((prev) => ({
-                        ...prev,
-                        actores: prev.actores.map((a, i) =>
-                          i === index ? e.target.value : a
-                        ),
-                      }))
-                    }
-                    required
-                  />
-                  <button
-                    type="button"
-                    onClick={() =>
-                      setProyectoData((prev) => ({
-                        ...prev,
-                        actores: prev.actores.filter((_, i) => i !== index),
-                      }))
-                    }
-                    disabled={proyectoData.actores.length <= 1}
-                  >
-                    -
-                  </button>
-                </div>
-              ))}
-              <button
-                type="button"
-                onClick={() =>
-                  setProyectoData((prev) => ({
-                    ...prev,
-                    actores: [...prev.actores, ""],
-                  }))
-                }
-              >
-                + Agregar Actor
-              </button>
-            </div>
-            
+            <h4>Actores Principales</h4>
+            <p className="help-text">
+              Por favor, proporciona el nombre y una breve descripción para cada
+              uno de los siguientes actores: Patrocinador, Beneficiario,
+              Ejecutor y Financista. Explica su rol y aportes en el proyecto.
+            </p>
+
+            {/* Patrocinador */}
+            <label>Patrocinador</label>
+            <input
+              type="text"
+              placeholder="Nombre del patrocinador"
+              value={proyectoData.actores.patrocinador.nombre}
+              onChange={(e) =>
+                setProyectoData((prev) => ({
+                  ...prev,
+                  actores: {
+                    ...prev.actores,
+                    patrocinador: {
+                      ...prev.actores.patrocinador,
+                      nombre: e.target.value,
+                    },
+                  },
+                }))
+              }
+              required
+            />
+
+            <label>Patrocinador (descripción)</label>
+            <textarea
+              rows="3"
+              placeholder="Rol y aportes del patrocinador"
+              value={proyectoData.actores.patrocinador.descripcion}
+              onChange={(e) =>
+                setProyectoData((prev) => ({
+                  ...prev,
+                  actores: {
+                    ...prev.actores,
+                    patrocinador: {
+                      ...prev.actores.patrocinador,
+                      descripcion: e.target.value,
+                    },
+                  },
+                }))
+              }
+              required
+            />
+
+            {/* Beneficiario */}
+            <label>Beneficiario</label>
+            <input
+              type="text"
+              placeholder="Nombre del beneficiario"
+              value={proyectoData.actores.beneficiario.nombre}
+              onChange={(e) =>
+                setProyectoData((prev) => ({
+                  ...prev,
+                  actores: {
+                    ...prev.actores,
+                    beneficiario: {
+                      ...prev.actores.beneficiario,
+                      nombre: e.target.value,
+                    },
+                  },
+                }))
+              }
+              required
+            />
+
+            <label>Beneficiario (descripción)</label>
+            <textarea
+              rows="3"
+              placeholder="Rol y aportes del beneficiario"
+              value={proyectoData.actores.beneficiario.descripcion}
+              onChange={(e) =>
+                setProyectoData((prev) => ({
+                  ...prev,
+                  actores: {
+                    ...prev.actores,
+                    beneficiario: {
+                      ...prev.actores.beneficiario,
+                      descripcion: e.target.value,
+                    },
+                  },
+                }))
+              }
+              required
+            />
+
+            {/* Ejecutor */}
+            <label>Ejecutor</label>
+            <input
+              type="text"
+              placeholder="Nombre del ejecutor"
+              value={proyectoData.actores.ejecutor.nombre}
+              onChange={(e) =>
+                setProyectoData((prev) => ({
+                  ...prev,
+                  actores: {
+                    ...prev.actores,
+                    ejecutor: {
+                      ...prev.actores.ejecutor,
+                      nombre: e.target.value,
+                    },
+                  },
+                }))
+              }
+              required
+            />
+
+            <label>Ejecutor (descripción)</label>
+            <textarea
+              rows="3"
+              placeholder="Rol y aportes del ejecutor"
+              value={proyectoData.actores.ejecutor.descripcion}
+              onChange={(e) =>
+                setProyectoData((prev) => ({
+                  ...prev,
+                  actores: {
+                    ...prev.actores,
+                    ejecutor: {
+                      ...prev.actores.ejecutor,
+                      descripcion: e.target.value,
+                    },
+                  },
+                }))
+              }
+              required
+            />
+
+            {/* Financista */}
+            <label>Financista</label>
+            <input
+              type="text"
+              placeholder="Nombre del financista"
+              value={proyectoData.actores.financista.nombre}
+              onChange={(e) =>
+                setProyectoData((prev) => ({
+                  ...prev,
+                  actores: {
+                    ...prev.actores,
+                    financista: {
+                      ...prev.actores.financista,
+                      nombre: e.target.value,
+                    },
+                  },
+                }))
+              }
+              required
+            />
+
+            <label>Financista (descripción)</label>
+            <textarea
+              rows="3"
+              placeholder="Rol y aportes del financista"
+              value={proyectoData.actores.financista.descripcion}
+              onChange={(e) =>
+                setProyectoData((prev) => ({
+                  ...prev,
+                  actores: {
+                    ...prev.actores,
+                    financista: {
+                      ...prev.actores.financista,
+                      descripcion: e.target.value,
+                    },
+                  },
+                }))
+              }
+              required
+            />
+
+            {/* Fecha de Aceptación (Carta) */}
+            <label>Fecha de Aceptación (Carta)</label>
+            <p className="help-text">
+              Indica la fecha en que se firmó o emitió la carta de aceptación.
+            </p>
+            <input
+              type="date"
+              value={proyectoData.cartaAceptacion[0].fecha}
+              onChange={(e) =>
+                handleCartaAceptacionChange("fecha", e.target.value)
+              }
+              required
+            />
           </div>
         )}
 
-        {/* Paso 6: Documentos */}
         {currentStep === 5 && (
           <div className="form-step">
-            <h3>{steps[5]}</h3>
-            <div className="form-group">
-              <h4>Subir Documentos</h4>
+            <h4>Documentos</h4>
 
-              <h6>Inscripción de trabajo de graduación</h6>
-              <FileUpload
-                fileName="inscripcion_trabajo_graduacion"
-                initialUploaded={
-                  archivosSubidos["inscripcion_trabajo_graduacion"]
-                }
-                onSuccess={(ruta) => {
-                  setRutaInscripcion(ruta);
-                  setArchivosSubidos((prev) => ({
-                    ...prev,
-                    inscripcion_trabajo_graduacion: true,
-                  }));
-                }}
-              />
-              {rutaInscripcion && <p>Ruta: {rutaInscripcion}</p>}
+            <label>Inscripción de Trabajo de Graduación</label>
+            <p className="help-text">Subir comprobante de la inscripción.</p>
+            <FileUpload
+              fileName="inscripcion_trabajo_graduacion"
+              initialUploaded={
+                archivosSubidos["inscripcion_trabajo_graduacion"]
+              }
+              onSuccess={(ruta) => {
+                setRutaInscripcion(ruta);
+                setArchivosSubidos((prev) => ({
+                  ...prev,
+                  inscripcion_trabajo_graduacion: true,
+                }));
+              }}
+            />
+            {rutaInscripcion && <p>{rutaInscripcion}</p>}
 
-              <h6>Certificación Global de Notas</h6>
-              <FileUpload
-                fileName="certificacion_global_notas"
-                initialUploaded={archivosSubidos["certificacion_global_notas"]}
-                onSuccess={(ruta) => {
-                  setRutaCertificacion(ruta);
-                  setArchivosSubidos((prev) => ({
-                    ...prev,
-                    certificacion_global_notas: true,
-                  }));
-                }}
-              />
-              {rutaCertificacion && <p>Ruta: {rutaCertificacion}</p>}
+            <label>Certificación Global de Notas</label>
+            <p className="help-text">
+              Subir la copia de certificación de notas.
+            </p>
+            <FileUpload
+              fileName="certificacion_global_notas"
+              initialUploaded={archivosSubidos["certificacion_global_notas"]}
+              onSuccess={(ruta) => {
+                setRutaCertificacion(ruta);
+                setArchivosSubidos((prev) => ({
+                  ...prev,
+                  certificacion_global_notas: true,
+                }));
+              }}
+            />
+            {rutaCertificacion && <p>{rutaCertificacion}</p>}
 
-              <h6>Constancia de servicio social</h6>
-              <FileUpload
-                fileName="constancia_servicio_social"
-                initialUploaded={archivosSubidos["constancia_servicio_social"]}
-                onSuccess={(ruta) => {
-                  setRutaServicioSocial(ruta);
-                  setArchivosSubidos((prev) => ({
-                    ...prev,
-                    constancia_servicio_social: true,
-                  }));
-                }}
-              />
-              {rutaServicioSocial && <p>Ruta: {rutaServicioSocial}</p>}
+            <label>Constancia de Servicio Social</label>
+            <p className="help-text">
+              Subir constancia emitida por el decanato.
+            </p>
+            <FileUpload
+              fileName="constancia_servicio_social"
+              initialUploaded={archivosSubidos["constancia_servicio_social"]}
+              onSuccess={(ruta) => {
+                setRutaServicioSocial(ruta);
+                setArchivosSubidos((prev) => ({
+                  ...prev,
+                  constancia_servicio_social: true,
+                }));
+              }}
+            />
+            {rutaServicioSocial && <p>{rutaServicioSocial}</p>}
 
-              <h6>Carta de Aceptación</h6>
-              <div className="form-group">
-              <label>Fecha de Aceptación (Carta)</label>
-              <input
-                type="date"
-                value={proyectoData.cartaAceptacion[0].fecha}
-                onChange={(e) =>
-                  handleCartaAceptacionChange("fecha", e.target.value)
-                }
-                required
-              />
-            </div>
-              <FileUpload
-                fileName="carta_aceptacion"
-                initialUploaded={archivosSubidos["carta_aceptacion"]}
-                onSuccess={(ruta) => {
-                  setRutaCartaAceptacion(ruta);
-                  setArchivosSubidos((prev) => ({
-                    ...prev,
-                    carta_aceptacion: true,
-                  }));
-                }}
-              />
-              {rutaCartaAceptacion && <p>Ruta: {rutaCartaAceptacion}</p>}
-            </div>
+            <label>Carta de Aceptación</label>
+            <p className="help-text">
+              Subir la carta de aceptación firmada y sellada.
+            </p>
+            <FileUpload
+              fileName="carta_aceptacion"
+              initialUploaded={archivosSubidos["carta_aceptacion"]}
+              onSuccess={(ruta) => {
+                setRutaCartaAceptacion(ruta);
+                setArchivosSubidos((prev) => ({
+                  ...prev,
+                  carta_aceptacion: true,
+                }));
+              }}
+            />
+            {rutaCartaAceptacion && <p>{rutaCartaAceptacion}</p>}
           </div>
         )}
 

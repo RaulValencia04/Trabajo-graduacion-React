@@ -1,12 +1,10 @@
-import React, { useState, useContext, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom'; // Importa useNavigate
-import {jwtDecode} from 'jwt-decode'; // Importa jwtDecode si no lo tienes ya instalado
-import { AuthContext } from '../Auth/Context/AuthContext';
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+
 import './RegistroUsuario.css';
 
 const RegistroUsuario = () => {
-  const navigate = useNavigate(); // Inicializa navigate
-  const {  dispatch } = useContext(AuthContext);
+  const navigate = useNavigate();
   const API_URL = process.env.REACT_APP_API_URL;
 
   const [form, setForm] = useState({
@@ -20,34 +18,51 @@ const RegistroUsuario = () => {
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Redirigir automáticamente al usuario autenticado si hay un token válido en sessionStorage
-  useEffect(() => {
-    const token = sessionStorage.getItem('token');
-    if (token) {
-      try {
-        const decodedToken = jwtDecode(token);
+  const opcionesCarreras = [
+    'Ingeniería Mecánica',
+    'Ingeniería Química',
+    'Técnico en Textiles',
+    'Ingeniería en Procesos Textiles',
+    'Ingeniería Eléctrica',
+    'Ingeniería en Tecnología y Procesamiento de Alimentos',
+    'Ingeniería en Desarrollo de Software',
+    'Ingeniería en Telecomunicaciones y Redes',
+    'Ingeniería Civil',
+    'Ingeniería Industrial',
+    'Ingeniería en Sistemas Informáticos',
+    'Ingeniería Agronómica',
+    'Arquitectura',
+  ];
 
-        // Verificar si el token ha expirado
-        if (decodedToken.exp * 1000 > Date.now()) {
-          dispatch({
-            type: 'login',
-            payload: {
-              token,
-              role: decodedToken.role,
-              email: decodedToken.sub,
-            },
-          });
-          navigate('/inicio', { replace: true });
-        } else {
-          // Si el token ha expirado, se remueve de sessionStorage
-          sessionStorage.removeItem('token');
-        }
-      } catch (error) {
-        console.error('Error al decodificar el token:', error);
-        sessionStorage.removeItem('token');
-      }
+  const isValidEmail = (email) =>
+    /^[a-zA-Z0-9._%+-]+@catolica\.edu\.sv$/.test(email);
+
+  const isValidPassword = (password) =>
+    /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/.test(password);
+
+  const validateForm = () => {
+    if (!form.nombreUsuario.trim() || form.nombreUsuario.length < 3) {
+      return 'El nombre de usuario debe tener al menos 3 caracteres.';
     }
-  }, [dispatch, navigate]);
+
+    if (!isValidEmail(form.correo)) {
+      return 'El correo debe ser válido y pertenecer a @catolica.edu.sv.';
+    }
+
+    if (!form.carrera.trim() || !opcionesCarreras.includes(form.carrera)) {
+      return 'Debes seleccionar una carrera válida.';
+    }
+
+    if (!isValidPassword(form.contrasena)) {
+      return 'La contraseña debe tener al menos 8 caracteres, incluir una letra mayúscula, una letra minúscula y un número.';
+    }
+
+    if (form.contrasena !== form.confirmContrasena) {
+      return 'Las contraseñas no coinciden.';
+    }
+
+    return null;
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -59,9 +74,9 @@ const RegistroUsuario = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    if (form.contrasena !== form.confirmContrasena) {
-      setError('Las contraseñas no coinciden');
+    const validationError = validateForm();
+    if (validationError) {
+      setError(validationError);
       return;
     }
 
@@ -69,7 +84,7 @@ const RegistroUsuario = () => {
     setIsSubmitting(true);
 
     try {
-      const response = await fetch(`${API_URL}/auth/registro`, { 
+      const response = await fetch(`${API_URL}/auth/registro`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -87,15 +102,8 @@ const RegistroUsuario = () => {
         const errorData = await response.json();
         setError(errorData.message || 'Error en el registro. Intenta de nuevo.');
       } else {
-        alert('Usuario registrado con éxito');
-        setForm({
-          nombreUsuario: '',
-          correo: '',
-          carrera: '',
-          contrasena: '',
-          confirmContrasena: '',
-        });
-        navigate('/login'); // Redirige al usuario a la página de inicio de sesión
+        alert('Usuario registrado con éxito. Redirigiendo al inicio de sesión...');
+        navigate('/login');
       }
     } catch (err) {
       setError('Error en el servidor. Intenta más tarde.');
@@ -132,12 +140,19 @@ const RegistroUsuario = () => {
 
         <label>
           Carrera:
-          <input
-            type="text"
+          <select
             name="carrera"
             value={form.carrera}
             onChange={handleChange}
-          />
+            required
+          >
+            <option value="">Selecciona una carrera</option>
+            {opcionesCarreras.map((carrera, index) => (
+              <option key={index} value={carrera}>
+                {carrera}
+              </option>
+            ))}
+          </select>
         </label>
 
         <label>
@@ -166,6 +181,13 @@ const RegistroUsuario = () => {
 
         <button type="submit" className="registro-boton" disabled={isSubmitting}>
           {isSubmitting ? 'Registrando...' : 'Registrarse'}
+        </button>
+        <button
+          type="button"
+          className="registro-boton-secondary"
+          onClick={() => navigate('/login')}
+        >
+          Volver al inicio de sesión
         </button>
       </form>
     </div>

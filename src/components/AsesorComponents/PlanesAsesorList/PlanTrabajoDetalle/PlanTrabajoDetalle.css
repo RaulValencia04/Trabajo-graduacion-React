@@ -1,0 +1,160 @@
+@import url('https://fonts.googleapis.com/css2?family=Times+New+Roman&display=swap');
+
+/* Fondo general */
+body {
+  background-color: #fafafa; /* Gris clarito para no saturar */
+  margin: 0;
+  padding: 0;
+  font-family: 'Times New Roman', serif;
+  color: #333; /* Color de texto principal */
+}
+
+/* Contenedor principal */
+.plan-container {
+  max-width: 900px;
+  margin: 50px auto;
+  background-color: #ffffff;
+  padding: 40px;
+  border: 1px solid #ddd;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  line-height: 1.6;
+}
+
+/* Título principal */
+.plan-title {
+  font-size: 2em;
+  text-align: center;
+  margin-bottom: 0.6em;
+  color: #880c09; /* Rojo oscuro institucional */
+  border-bottom: 2px solid #880c09;
+  padding-bottom: 0.3em;
+}
+
+/* Secciones */
+.plan-section {
+  margin-top: 2em;
+  padding: 15px 20px;
+  border-radius: 5px;
+  border-left: 5px solid #880c09; /* Franja lateral */
+  background-color: #fbfaf4; /* Amarillo muy suave */
+  margin-bottom: 20px;
+}
+
+/* Título de cada sección */
+.plan-section h2 {
+  font-size: 1.4em;
+  margin-bottom: 10px;
+  color: #880c09;
+}
+
+/* Botón "Leer más / Leer menos" */
+.toggle-btn {
+  background-color: #880c09;
+  color: #fff;
+  border: none;
+  padding: 5px 12px;
+  margin-top: 5px;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.toggle-btn:hover {
+  background-color: #aa2c2c; /* Rojo un poco más claro */
+}
+
+/* Bloques descriptivos (problema, justificación, etc.) */
+.desc-block {
+  margin-bottom: 1rem;
+  background-color: #f9f9f9;
+  padding: 10px;
+  border-left: 3px solid #880c09;
+  border-radius: 4px;
+}
+
+.desc-block h3 {
+  margin: 0 0 0.2em 0;
+  font-size: 1.2em;
+  color: #333;
+}
+
+/* Listas de Miembros */
+.miembros-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.miembro-item {
+  margin-bottom: 10px;
+  background-color: #fdf1f1; 
+  padding: 10px;
+  border-left: 3px solid #880c09;
+  border-radius: 4px;
+}
+
+/* Imagen del cronograma */
+.cronograma-image-container {
+  margin-bottom: 15px;
+}
+
+.cronograma-image {
+  max-width: 100%;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+/* Cronograma (lista) */
+.cronograma-list {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+}
+.cronograma-item {
+  background-color: #f9f9f9;
+  border-left: 3px solid #880c09;
+  padding: 10px;
+  margin-bottom: 10px;
+  border-radius: 3px;
+}
+
+/* Actividades y Fechas de Reportes */
+.actividades-list {
+  list-style-type: square;
+  margin-left: 20px;
+}
+
+/* TABLA de Fechas de Reportes */
+.reportes-table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: #ffffff;
+  margin-top: 10px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+}
+
+.reportes-table th {
+  background-color: #880c09;
+  color: white;
+  padding: 10px;
+  text-align: left;
+}
+
+.reportes-table td {
+  padding: 10px;
+  border-bottom: 1px solid #ddd;
+}
+
+/* Filas alternas */
+.reportes-table tbody tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+
+/* Textos de estado */
+.detail-loading,
+.detail-error,
+.detail-notfound {
+  text-align: center;
+  font-weight: bold;
+  margin: 40px auto;
+  color: #880c09;
+}

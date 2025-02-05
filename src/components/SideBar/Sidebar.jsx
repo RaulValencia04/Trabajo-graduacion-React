@@ -22,6 +22,7 @@ const Sidebar = () => {
     const userLinks = [
         { to: '/inicio', icon: 'fas fa-clock', text: 'INICIO' },
         { to: '/propuestas', icon: 'fas fa-file-upload', text: 'SUBIR PROPUESTA' },
+        { to: '/plan-trabajo', icon: 'fas fa-file-upload', text: 'PLAN DE TRABAJO' },
         { to: '/progreso', icon: 'fas fa-file-upload', text: 'MI PROGRESO' },
         { to: '/entregas', icon: 'fas fa-calendar-alt', text: 'ENTREGAS DE AVANCE' },
     ];
@@ -29,6 +30,7 @@ const Sidebar = () => {
     const asesorLinks = [
         { to: '/inicio', icon: 'fas fa-home', text: 'PÁGINA DE INICIO' },
         { to: '/peticiones_asesoria', icon: 'fas fa-users', text: 'VER SOLICITUDES' },
+        { to: '/lista-planes', icon: 'fas fa-users', text: 'VER PLANES DE TRABAJO' },
         { to: '/entregas-aprobadas', icon: 'fas fa-upload', text: 'SUBIR INFORME A DECANATO' },
     ];
 

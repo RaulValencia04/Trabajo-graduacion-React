@@ -79,5 +79,32 @@
     /* position:fixed; */
   }
   /* Botones o enlaces (opcional) */
+  .document-container {
+    display: flex;
+    flex-wrap: wrap;    /* Para múltiples filas */
+    gap: 1rem;
+    justify-content: center;
+  }
+  
+  .document-item {
+    flex: 1 1 300px;    /* Ancho mínimo de 300px */
+    background-color: #fff;
+    padding: 1rem;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    text-align: center;
+  }
+  
+  .document-item h3 {
+    margin-bottom: 0.5rem;
+  }
+  
+  .document-image {
+    max-width: 100%;
+    height: auto;
+    display: block;
+    margin: 0 auto;
+  }
+  
 
   
