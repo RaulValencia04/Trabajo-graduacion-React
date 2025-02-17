@@ -1,25 +1,25 @@
 import React, { useState, useEffect, useContext } from "react";
 import { useNavigate } from "react-router-dom";
-import FileUpload from "../../docs/FileUpload";
+import FileUpload from "../../docs/FileUpload"; // Tu FileUpload sin cambios
 import "./FormulariosPlanesTrabajo.css";
 import { useApi } from "../../Auth/Helpers/api";
 import { AuthContext } from "../../Auth/Context/AuthContext";
 
 /**
  * @param {Object} props
- * @param {Number} props.trabajoId - ID del trabajo de graduación.
+ * @param {Number} props.trabajoId - ID del trabajo de graduación
  * @param {String} props.tipoTrabajo - "Pasantía" | "Proyecto" | "Investigación"
- * @param {Object} [props.planData] - Datos precargados si el plan fue rechazado. Estructura:
+ * @param {Object} [props.planData] - Datos ya existentes del plan si se edita o fue rechazado.
  *        {
- *           observaciones: string,
- *           cronograma: string (JSON),
- *           actividades: string (JSON),
- *           fechasReportes: string (JSON),
- *           fechaVisita: Date (o string),
- *           fechaEntregaInformeFinal: Date (o string),
- *           linkDrive: string,
- *           ruta_cronograma: string,
- *           .
+ *          planId: number,
+ *          cronograma: string (JSON),
+ *          actividades: string (JSON),
+ *          fechasReportes: string (JSON),
+ *          fechaVisita: Date|string,
+ *          fechaEntregaInformeFinal: Date|string,
+ *          linkDrive: string,
+ *          ruta_cronograma: string (almacenado como JSONB en la BD),
+ *          ...
  *        }
  */
 const FormulariosPlanesTrabajo = ({ trabajoId, tipoTrabajo, planData }) => {
@@ -29,9 +29,30 @@ const FormulariosPlanesTrabajo = ({ trabajoId, tipoTrabajo, planData }) => {
   const { state } = useContext(AuthContext);
   const { userId } = state;
 
-  const [currentStep, setCurrentStep] = useState(0);
 
-  // Estado del plan de trabajo
+  const safeJSONParse = (str) => {
+    try {
+      return JSON.parse(str);
+    } catch {
+      return [];
+    }
+  };
+
+
+  const [currentStep, setCurrentStep] = useState(0);
+  const steps = ["Información General", "Cronograma", "Actividades", "Validación"];
+  const nextStep = () => setCurrentStep((s) => Math.min(s + 1, steps.length - 1));
+  const prevStep = () => setCurrentStep((s) => Math.max(s - 1, 0));
+
+  const [cronogramaFile, setCronogramaFile] = useState(null);
+
+  const [cronogramaUploaded, setCronogramaUploaded] = useState(false);
+
+  const [rutaCronograma, setRutaCronograma] = useState(
+    planData?.ruta_cronograma || ""
+  );
+
+
   const [planTrabajo, setPlanTrabajo] = useState({
     trabajoGraduacionId: trabajoId,
     tipoTrabajo,
@@ -42,29 +63,11 @@ const FormulariosPlanesTrabajo = ({ trabajoId, tipoTrabajo, planData }) => {
     fechaEntregaInformeFinal: "",
     validado: false,
     linkDrive: "",
-    rutaCronograma: "",
-    antecedentes: "",
-    observaciones: "",
+    rutaCronograma: planData?.ruta_cronograma || "",
   });
-  const formatDate = (dateValue) => {
-    if (!dateValue) return ""; // Evita errores si el valor es null o undefined
 
-    if (Array.isArray(dateValue)) {
-      // Si la fecha viene en formato array [2025,3,4], la convertimos
-      const [year, month, day] = dateValue;
-      return `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(
-        2,
-        "0"
-      )}`;
-    }
-
-    return dateValue; // Si ya es un string válido en "yyyy-MM-dd", devolverlo sin cambios
-  };
-
-  // Pre-carga de datos si `planData` existe (por ejemplo, plan rechazado)
   useEffect(() => {
     if (planData) {
-      // console.log(planData);
       setPlanTrabajo((prev) => ({
         ...prev,
         observaciones: planData.observaciones || "",
@@ -83,36 +86,21 @@ const FormulariosPlanesTrabajo = ({ trabajoId, tipoTrabajo, planData }) => {
         linkDrive: planData.linkDrive || "",
         rutaCronograma: planData.ruta_cronograma || "",
       }));
+
+
+      setCronogramaUploaded(false);
+
+      if (planData.ruta_cronograma) {
+        setRutaCronograma(planData.ruta_cronograma);
+      }
     }
   }, [planData]);
 
-  // Función parse JSON segura
-  const safeJSONParse = (str) => {
-    try {
-      return JSON.parse(str);
-    } catch {
-      return [];
-    }
-  };
-
-  const steps = [
-    "Información General",
-    "Cronograma",
-    "Actividades",
-    "Validación",
-  ];
-
-  const nextStep = () =>
-    setCurrentStep((prev) => Math.min(prev + 1, steps.length - 1));
-  const prevStep = () => setCurrentStep((prev) => Math.max(prev - 1, 0));
-
-  // Manejador de campos simples
   const handleChange = (e) => {
     const { name, value } = e.target;
     setPlanTrabajo((prev) => ({ ...prev, [name]: value }));
   };
 
-  // ------------- CRONOGRAMA -------------
   const addCronogramaItem = () => {
     setPlanTrabajo((prev) => ({
       ...prev,
@@ -122,86 +110,106 @@ const FormulariosPlanesTrabajo = ({ trabajoId, tipoTrabajo, planData }) => {
       ],
     }));
   };
-
-  const handleCronogramaChange = (index, field, value) => {
+  const handleCronogramaChange = (idx, field, val) => {
     setPlanTrabajo((prev) => {
-      const newArr = [...prev.cronograma];
-      newArr[index][field] = value;
-      return { ...prev, cronograma: newArr };
+      const arr = [...prev.cronograma];
+      arr[idx][field] = val;
+      return { ...prev, cronograma: arr };
     });
   };
 
-  // ------------- ACTIVIDADES -------------
+  
   const addActividad = () => {
     setPlanTrabajo((prev) => ({
       ...prev,
       actividades: [...prev.actividades, ""],
     }));
   };
-  const removeActividad = (index) => {
+  const removeActividad = (i) => {
     setPlanTrabajo((prev) => ({
       ...prev,
-      actividades: prev.actividades.filter((_, i) => i !== index),
+      actividades: prev.actividades.filter((_, idx) => idx !== i),
     }));
   };
-  const handleActividadChange = (index, value) => {
+  const handleActividadChange = (i, val) => {
     setPlanTrabajo((prev) => {
-      const newArr = [...prev.actividades];
-      newArr[index] = value;
-      return { ...prev, actividades: newArr };
+      const arr = [...prev.actividades];
+      arr[i] = val;
+      return { ...prev, actividades: arr };
     });
   };
 
-  // ------------- FECHAS DE REPORTES -------------
   const addFechaReporte = () => {
     setPlanTrabajo((prev) => ({
       ...prev,
       fechasReportes: [...prev.fechasReportes, ""],
     }));
   };
-  const removeFechaReporte = (index) => {
+  const removeFechaReporte = (i) => {
     setPlanTrabajo((prev) => ({
       ...prev,
-      fechasReportes: prev.fechasReportes.filter((_, i) => i !== index),
+      fechasReportes: prev.fechasReportes.filter((_, idx) => idx !== i),
     }));
   };
-  const handleFechaReporteChange = (index, value) => {
+  const handleFechaReporteChange = (i, val) => {
     setPlanTrabajo((prev) => {
-      const newArr = [...prev.fechasReportes];
-      newArr[index] = value;
-      return { ...prev, fechasReportes: newArr };
+      const arr = [...prev.fechasReportes];
+      arr[i] = val;
+      return { ...prev, fechasReportes: arr };
     });
   };
 
-  // ------------- SUBMIT -------------
+  // Formatear fecha (si es un array [yyyy,MM,dd], la convertimos)
+  const formatDate = (dateValue) => {
+    if (!dateValue) return "";
+    if (Array.isArray(dateValue)) {
+      const [year, month, day] = dateValue;
+      return `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(
+        2,
+        "0"
+      )}`;
+    }
+    return dateValue; 
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    let finalLinkDrive = planTrabajo.linkDrive.trim();
-    if (!finalLinkDrive && planTrabajo.rutaCronograma) {
-      finalLinkDrive = planTrabajo.rutaCronograma;
-    }
+  
+    const finalRutaPlain = cronogramaUploaded && rutaCronograma
+      ? rutaCronograma
+      : planData?.ruta_cronograma || "";
 
+ 
+    const finalRutaJson = finalRutaPlain
+      ? JSON.stringify({ file: finalRutaPlain })
+      : "{}";
+
+    
     const bodyData = {
       trabajoGraduacion: { id: planTrabajo.trabajoGraduacionId },
       tipoTrabajo: planTrabajo.tipoTrabajo,
+      
       cronograma: planTrabajo.cronograma,
       actividades: planTrabajo.actividades,
       fechasReportes: planTrabajo.fechasReportes,
+
       fechaVisita: planTrabajo.fechaVisita || null,
       fechaEntregaInformeFinal: planTrabajo.fechaEntregaInformeFinal,
       validado: planTrabajo.validado,
-      linkDrive: finalLinkDrive,
-      rutaCronograma: planTrabajo.rutaCronograma,
-      antecedentes: planTrabajo.antecedentes,
-      observaciones: planTrabajo.observaciones,
+      linkDrive: (planTrabajo.linkDrive || "").trim(),
+
+      
+      rutaCronograma: finalRutaJson,
       creadoPor: { id: userId },
     };
 
     try {
       let response;
       if (planData?.planId) {
-        // 🔹 Si hay un `planId`, actualiza el plan existente (PUT)
+        // Actualizar
+
+        console.log(planData);
         response = await authFetch(
           `${API_URL}/api/planes-trabajo/${planData.planId}/actualizar`,
           {
@@ -211,7 +219,8 @@ const FormulariosPlanesTrabajo = ({ trabajoId, tipoTrabajo, planData }) => {
           }
         );
       } else {
-        // 🔹 Si NO hay `planId`, crea un nuevo plan (POST)
+        // Crear
+        console.log(bodyData);
         response = await authFetch(`${API_URL}/api/planes-trabajo`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -221,7 +230,7 @@ const FormulariosPlanesTrabajo = ({ trabajoId, tipoTrabajo, planData }) => {
 
       if (!response.ok) {
         throw new Error(
-          `Error al enviar los datos del plan de trabajo (status ${response.status})`
+          `Error al enviar plan (status ${response.status})`
         );
       }
 
@@ -231,11 +240,12 @@ const FormulariosPlanesTrabajo = ({ trabajoId, tipoTrabajo, planData }) => {
         } con éxito`
       );
       navigate("/inicio");
-    } catch (error) {
-      console.error("Error:", error);
-      alert("Hubo un error al enviar el plan de trabajo. Intente nuevamente.");
+    } catch (err) {
+      console.error("Error al enviar plan:", err);
+      alert("Ocurrió un error al enviar. Intenta de nuevo.");
     }
   };
+
 
   return (
     <div className="form-container pt-4 pb-4">
@@ -244,249 +254,210 @@ const FormulariosPlanesTrabajo = ({ trabajoId, tipoTrabajo, planData }) => {
       </h2>
 
       <div className="tabs-container">
-        {steps.map((step, idx) => (
+        {steps.map((st, i) => (
           <div
-            key={idx}
-            className={`tab ${idx === currentStep ? "active-tab" : ""}`}
-            onClick={() => setCurrentStep(idx)}
+            key={i}
+            className={`tab ${i === currentStep ? "active-tab" : ""}`}
+            onClick={() => setCurrentStep(i)}
           >
-            {step}
+            {st}
           </div>
         ))}
       </div>
 
       <form onSubmit={handleSubmit} className="plan-form mt-3">
-        {/* PASO 0: INFORMACIÓN GENERAL */}
+        {/* Paso 0: Info General */}
         {currentStep === 0 && (
           <div className="form-step">
-            <h3 className="step-title">{steps[0]}</h3>
+            <h3>{steps[0]}</h3>
 
             <div className="form-group">
-              <label className="label">Enlace Manual de Drive (opcional)</label>
+              <label>Enlace Manual de Drive (opcional)</label>
               <input
                 type="text"
                 name="linkDrive"
-                className="input-field"
-                placeholder="Ej. https://drive.google.com/folder/..."
                 value={planTrabajo.linkDrive}
                 onChange={handleChange}
               />
               <small className="help-text">
-                Si no especificas nada y subes un archivo en la pestaña
-                "Cronograma", usaremos la ruta que genere ese archivo.
+                Si no especificas nada y subes un archivo en “Cronograma”,
+                usaremos esa ruta.
               </small>
             </div>
+
           </div>
         )}
 
-        {/* PASO 1: CRONOGRAMA */}
+        {/* Paso 1: Cronograma */}
         {currentStep === 1 && (
           <div className="form-step">
-            <h3 className="step-title">{steps[1]}</h3>
-            {/* Mostrar la imagen del cronograma si existe */}
-            {planData?.ruta_cronograma && (
-              <div className="text-center mb-3">
-                <h5>Imagen del Cronograma Actual</h5>
-                <img
-                  src={`${API_URL}/uploads/${planData.ruta_cronograma}`}
-                  alt="Cronograma Actual"
-                  className="img-fluid rounded border shadow-sm"
-                  style={{
-                    maxWidth: "100%",
-                    maxHeight: "300px",
-                    objectFit: "contain",
-                  }}
-                />
-              </div>
-            )}
+            <h3>{steps[1]}</h3>
 
-            <p className="help-text">
-              Sube un archivo (imagen) con tu cronograma general.
-            </p>
+{/* Mostrar la imagen previa si existe y no hemos subido otra */}
+{planData?.ruta_cronograma && !cronogramaFile && !cronogramaUploaded && (
+  <div className="text-center mb-3">
+    <img
+      src={`${API_URL}/uploads/${JSON.parse(planData.ruta_cronograma).file}`}
+      alt="Cronograma Actual"
+      style={{ maxWidth: "100%", maxHeight: "300px" }}
+    />
+  </div>
+)}
+
+
+            <p>Sube una nueva imagen para reemplazar (o deja así si no deseas cambiar).</p>
             <FileUpload
               fileName="cronograma"
-              onSuccess={(ruta) => {
+              selectedFile={cronogramaFile}
+              isUploaded={cronogramaUploaded}
+              onFileSelect={(file) => {
+                setCronogramaFile(file);
+              }}
+              onSetIsUploaded={(uploaded, ruta) => {
+                setCronogramaUploaded(uploaded);
+                // 'ruta' es una cadena tipo "miArchivo.png"
+                setRutaCronograma(ruta);
                 setPlanTrabajo((prev) => ({ ...prev, rutaCronograma: ruta }));
               }}
             />
 
-            <h4 className="sub-title">Detalle Estructurado del Cronograma</h4>
-            <p className="help-text">
-              Aquí puedes detallar cada actividad con sus fechas de inicio y
-              fin.
-            </p>
+            {cronogramaUploaded && (
+              <button
+                type="button"
+                onClick={() => {
+                  // Permitir "otra" subida
+                  setCronogramaUploaded(false);
+                  setCronogramaFile(null);
+                }}
+              >
+                Reemplazar otra vez
+              </button>
+            )}
 
-            {planTrabajo.cronograma.map((item, i) => (
-              <div key={i} className="cronograma-item">
-                <div className="form-group">
-                  <label className="label">Nombre de la Actividad</label>
-                  <input
-                    type="text"
-                    className="input-field"
-                    placeholder="Ej. 'Investigación de requisitos'"
-                    value={item.actividad}
-                    onChange={(e) =>
-                      handleCronogramaChange(i, "actividad", e.target.value)
-                    }
-                  />
-                </div>
-                <div className="form-group">
-                  <label className="label">Fecha Inicio</label>
-                  <input
-                    type="date"
-                    className="input-field"
-                    value={formatDate(item.fechaInicio)}
-                    onChange={(e) =>
-                      handleCronogramaChange(i, "fechaInicio", e.target.value)
-                    }
-                  />
-                </div>
-                <div className="form-group">
-                  <label className="label">Fecha Fin</label>
-                  <input
-                    type="date"
-                    className="input-field"
-                    value={formatDate(item.fechaFin)}
-                    onChange={(e) =>
-                      handleCronogramaChange(i, "fechaFin", e.target.value)
-                    }
-                  />
-                </div>
+            <h4>Detalle Estructurado del Cronograma</h4>
+            {planTrabajo.cronograma.map((item, idx) => (
+              <div key={idx}>
+                <input
+                  type="text"
+                  placeholder="Actividad"
+                  value={item.actividad}
+                  onChange={(e) =>
+                    handleCronogramaChange(idx, "actividad", e.target.value)
+                  }
+                />
+                <input
+                  type="date"
+                  value={formatDate(item.fechaInicio)}
+                  onChange={(e) =>
+                    handleCronogramaChange(idx, "fechaInicio", e.target.value)
+                  }
+                />
+                <input
+                  type="date"
+                  value={formatDate(item.fechaFin)}
+                  onChange={(e) =>
+                    handleCronogramaChange(idx, "fechaFin", e.target.value)
+                  }
+                />
               </div>
             ))}
-
-            <button
-              type="button"
-              className="btn-add"
-              onClick={addCronogramaItem}
-            >
-              + Agregar línea cronograma
+            <button type="button" onClick={addCronogramaItem}>
+              + Agregar Fila
             </button>
           </div>
         )}
 
-        {/* PASO 2: ACTIVIDADES Y FECHAS REPORTES */}
+        {/* Paso 2: Actividades */}
         {currentStep === 2 && (
           <div className="form-step">
-            <h3 className="step-title">{steps[2]}</h3>
+            <h3>{steps[2]}</h3>
 
-            <h4 className="sub-title">Actividades Principales</h4>
-            <p className="help-text">
-              Describe macro-actividades o tareas claves (no tan detalladas como
-              el cronograma).
-            </p>
+            <h4>Actividades Principales</h4>
             {planTrabajo.actividades.map((act, idx) => (
-              <div key={idx} className="activity-item">
+              <div key={idx}>
                 <input
                   type="text"
-                  className="input-field"
-                  placeholder={`Actividad #${
-                    idx + 1
-                  } (Ej. 'Desarrollo de módulo X')`}
+                  placeholder={`Actividad #${idx + 1}`}
                   value={act}
                   onChange={(e) => handleActividadChange(idx, e.target.value)}
                 />
                 <button
                   type="button"
-                  className="btn-delete"
                   onClick={() => removeActividad(idx)}
+                  disabled={planTrabajo.actividades.length <= 1}
                 >
                   Eliminar
                 </button>
               </div>
             ))}
-            <button type="button" className="btn-add" onClick={addActividad}>
+            <button type="button" onClick={addActividad}>
               + Agregar Actividad
             </button>
 
-            <h4 className="sub-title">Fechas de Reportes Mensuales</h4>
-            <p className="help-text">
-              Asigna las fechas en que entregarás informes mensuales o de
-              avance.
-            </p>
-            {planTrabajo.fechasReportes.map((rep, idx) => (
-              <div key={idx} className="report-item">
+            <h4>Fechas de Reportes</h4>
+            {planTrabajo.fechasReportes.map((fr, idx) => (
+              <div key={idx}>
                 <input
                   type="date"
-                  className="input-field"
-                  value={formatDate(rep)} // 🛠 Aplica la función para corregir el formato
-                  onChange={(e) =>
-                    handleFechaReporteChange(idx, e.target.value)
-                  }
+                  value={formatDate(fr)}
+                  onChange={(e) => handleFechaReporteChange(idx, e.target.value)}
                 />
                 <button
                   type="button"
-                  className="btn-delete"
                   onClick={() => removeFechaReporte(idx)}
+                  disabled={planTrabajo.fechasReportes.length <= 1}
                 >
                   Eliminar
                 </button>
               </div>
             ))}
-
-            <button type="button" className="btn-add" onClick={addFechaReporte}>
-              + Agregar Fecha de Reporte
+            <button type="button" onClick={addFechaReporte}>
+              + Agregar Fecha
             </button>
           </div>
         )}
 
-        {/* PASO 3: VALIDACIÓN */}
+        {/* Paso 3: Validación Final */}
         {currentStep === 3 && (
           <div className="form-step">
-            <h3 className="step-title">{steps[3]}</h3>
+            <h3>{steps[3]}</h3>
 
-            <div className="form-group">
-              <label className="label">
-                Fecha de Entrega del Informe Final
-              </label>
-              <input
-                type="date"
-                name="fechaEntregaInformeFinal"
-                className="input-field"
-                value={planTrabajo.fechaEntregaInformeFinal}
-                onChange={handleChange}
-                required
-              />
-              <small className="help-text">
-                Indica la fecha estimada para tu informe final.
-              </small>
-            </div>
+            <label>Fecha de Entrega del Informe Final</label>
+            <input
+              type="date"
+              name="fechaEntregaInformeFinal"
+              value={planTrabajo.fechaEntregaInformeFinal}
+              onChange={handleChange}
+              required
+            />
 
             {tipoTrabajo === "Pasantía" && (
-              <div className="form-group">
-                <label className="label">Fecha de Visita del Asesor</label>
+              <>
+                <label>Fecha de Visita del Asesor</label>
                 <input
                   type="date"
                   name="fechaVisita"
-                  className="input-field"
                   value={planTrabajo.fechaVisita || ""}
                   onChange={handleChange}
                 />
-                <small className="help-text">
-                  El asesor agendará esta visita (si aplica).
-                </small>
-              </div>
+              </>
             )}
           </div>
         )}
 
-        {/* Botones de Navegación */}
+        {/* Navegación */}
         <div className="navigation-buttons">
           {currentStep > 0 && (
-            <button type="button" className="btn-nav" onClick={prevStep}>
+            <button type="button" onClick={prevStep}>
               Anterior
             </button>
           )}
           {currentStep < steps.length - 1 && (
-            <button type="button" className="btn-nav" onClick={nextStep}>
+            <button type="button" onClick={nextStep}>
               Siguiente
             </button>
           )}
-          {currentStep === steps.length - 1 && (
-            <button type="submit" className="btn-submit">
-              Enviar Plan
-            </button>
-          )}
+          {currentStep === steps.length - 1 && <button type="submit">Enviar</button>}
         </div>
       </form>
     </div>

@@ -183,7 +183,6 @@ const AsignacionEmpresa = () => {
           ></textarea>
         </div>
 
-        {/* Datos de Asignación de Empresa */}
         <div className="form-group">
           <label>Nombre de la Empresa</label>
           <input
@@ -225,7 +224,7 @@ const AsignacionEmpresa = () => {
           </select>
         </div>
 
-        {/* Botón de envío */}
+        
         <button type="submit" className="btn-submit">
           Enviar
         </button>

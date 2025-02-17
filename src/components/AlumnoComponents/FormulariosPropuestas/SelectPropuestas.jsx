@@ -57,7 +57,7 @@ export const SelectPropuestas = () => {
     );
   }
 
-  // Si ocurre un error
+  
   if (error) {
     return (
       <div className="error-container mt-5">
@@ -68,7 +68,7 @@ export const SelectPropuestas = () => {
     );
   }
 
-  // Si ya existe un proyecto activo
+  
   if (proyecto) {
     return (
       <div className="message-container mt-5">
@@ -79,7 +79,6 @@ export const SelectPropuestas = () => {
     );
   }
 
-  // Si no hay proyecto activo y no hay errores, muestra el componente UploadProject
   return <UploadProject />;
 };
 

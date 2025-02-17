@@ -1,4 +1,3 @@
-// App.js
 import React, { useContext } from "react";
 import {
   BrowserRouter as Router,
@@ -10,17 +9,13 @@ import {
 import { AuthProvider, AuthContext } from "./Auth/Context/AuthContext";
 import PrivateRoute from "./Auth/Context/PrivateRoute";
 import PublicRoute from "./Auth/Context/PublicRoute";
-
-// Component imports
 import Login from "./Auth/Login";
 import RegistroUsuario from "./Registro/RegistroUsuario";
 import Sidebar from "./SideBar/Sidebar";
 import Dashboard from "./Dashboard/Dashboard";
-import Entregas from "./Entregas/Entregas";
 import Usuario from "./usuario/Usuario";
 import FormularioCrearUsuario from "./usuario/FormularioCrearUsuario";
 import PropuestasSinAprobar from "./DecanataComponents/AprobarPropuesta/PropuestasSinAprobar";
-// import ProyectosAceptados from "./ProyectosAceptados/ProyectosAceptados";
 import AuditoriaList from "./AuditoriaList/AuditoriaList";
 import AlumnosActivos from "./DecanataComponents/AlumnosActivos/AlumnosActivos";
 import EntregasAprobadas from "./EntregasAprobadas/EntregasAprobadas";
@@ -34,9 +29,12 @@ import PropuestasAsesoria from "./AsesorComponents/PropuestasAsesoria/Propuestas
 import Progreso from "./AlumnoComponents/Progreso/Progreso";
 import PlanTrabajo from "./AlumnoComponents/PlanDeTrabajo/PlanTrabajo";
 import PlanesAsesorList from "./AsesorComponents/PlanesAsesorList/PlanesAsesorList";
-import PlanTrabajoDetalle from "./AsesorComponents/PlanesAsesorList/PlanTrabajoDetalle/PlanTrabajoDetalle"
-import "./App.css";
+import PlanTrabajoDetalle from "./AsesorComponents/PlanesAsesorList/PlanTrabajoDetalle/PlanTrabajoDetalle";
+import { InformeValidacion } from "./AlumnoComponents/INFORME/Entregas/InformeValidacion";
+import FormularioInformeProyecto from "./AlumnoComponents/INFORME/FormularioInformeProyecto";
+import FormularioInformePasantia from "./AlumnoComponents/INFORME/FormularioInformePasantia";
 
+import "./App.css";
 
 function App() {
   const { state } = useContext(AuthContext);
@@ -45,7 +43,6 @@ function App() {
 
   return (
     <div className="app-container">
-      {/* Sidebar solo se muestra si NO estás en /login o /registro */}
       {!isAuthPage && <Sidebar />}
 
       <div className={`main-content ${!isAuthPage ? "content-shift" : ""}`}>
@@ -166,8 +163,8 @@ function App() {
           <Route
             path="/entregas"
             element={
-              <PrivateRoute allowedRoles={["Estudiante", "Decano"]}>
-                <Entregas />
+              <PrivateRoute allowedRoles={["Estudiante"]}>
+                <InformeValidacion />
               </PrivateRoute>
             }
           />
@@ -191,11 +188,10 @@ function App() {
             path="/plan-trabajo"
             element={
               <PrivateRoute allowedRoles={["Estudiante"]}>
-                < PlanTrabajo/>
+                <PlanTrabajo />
               </PrivateRoute>
             }
           />
-
 
           <Route
             path="/progreso"
@@ -205,7 +201,7 @@ function App() {
               </PrivateRoute>
             }
           />
-          
+
           <Route
             path="/lista-planes"
             element={
@@ -222,6 +218,30 @@ function App() {
               </PrivateRoute>
             }
           />
+          <Route
+            path="/formulario-informe-pasantia"
+            element={
+              <PrivateRoute allowedRoles={["Estudiante"]}>
+                <FormularioInformePasantia />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/formulario-informe-proyecto"
+            element={
+              <PrivateRoute allowedRoles={["Estudiante"]}>
+                <FormularioInformeProyecto />
+              </PrivateRoute>
+            }
+          />
+          {/* <Route
+            path="/informe"
+            element={
+              <PrivateRoute allowedRoles={["Asesor"]}>
+                < />
+              </PrivateRoute>
+            }
+          /> */}
 
           {/* <Route
             path="/propuesta-aprobadas"

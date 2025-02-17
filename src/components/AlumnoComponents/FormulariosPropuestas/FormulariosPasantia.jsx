@@ -3,21 +3,30 @@ import FileUpload from "../../docs/FileUpload";
 import "./FormulariosPropuestas.css";
 import { AuthContext } from "../../Auth/Context/AuthContext";
 import { useApi } from "../../Auth/Helpers/api";
+import { useNavigate } from "react-router-dom";
+
 
 function FormularioPasantia() {
   const { state } = useContext(AuthContext);
-  const { token, userId } = state;
-  const { authFetch } = useApi();
-  const API_URL = process.env.REACT_APP_API_URL;
+  const { token, userId } = state;               // Credenciales
+  const { authFetch } = useApi();                // Para fetch con auth
+  const API_URL = process.env.REACT_APP_API_URL; // URL base del backend
+  const navigate = useNavigate();
+  
 
+  // -----------------------------
+  // Helpers de conteo de palabras
+  // -----------------------------
   function countWords(text) {
     return text.trim().split(/\s+/).filter(Boolean).length;
   }
-
   function countWordsArray(arr) {
     return arr.reduce((acc, item) => acc + countWords(item), 0);
   }
 
+  // -----------------------------
+  // Estado principal del formulario
+  // -----------------------------
   const [formData, setFormData] = useState({
     Fecha_inicio: "",
     Fecha_fin: "",
@@ -32,18 +41,33 @@ function FormularioPasantia() {
   });
 
   const [actividades, setActividades] = useState([""]);
-  const [archivosSubidos, setArchivosSubidos] = useState({
-    carta_aceptacion: false,
-    inscripcion_trabajo_graduacion: false,
-    certificacion_global_notas: false,
-    constancia_servicio_social: false,
-  });
 
+  // -----------------------------
+  // Estados para CADA archivo
+  // -----------------------------
+  // Inscripción
+  const [inscripcionFile, setInscripcionFile] = useState(null);
+  const [inscripcionUploaded, setInscripcionUploaded] = useState(false);
   const [rutaInscripcion, setRutaInscripcion] = useState(null);
+
+  // Certificación
+  const [certificacionFile, setCertificacionFile] = useState(null);
+  const [certificacionUploaded, setCertificacionUploaded] = useState(false);
   const [rutaCertificacion, setRutaCertificacion] = useState(null);
+
+  // Servicio Social
+  const [servicioSocialFile, setServicioSocialFile] = useState(null);
+  const [servicioSocialUploaded, setServicioSocialUploaded] = useState(false);
   const [rutaServicioSocial, setRutaServicioSocial] = useState(null);
+
+  // Carta de Aceptación
+  const [cartaFile, setCartaFile] = useState(null);
+  const [cartaUploaded, setCartaUploaded] = useState(false);
   const [rutaCartaAceptacion, setRutaCartaAceptacion] = useState(null);
 
+  // -----------------------------
+  // Control de pasos (Wizard)
+  // -----------------------------
   const [currentStep, setCurrentStep] = useState(0);
   const steps = [
     "Portada",
@@ -55,27 +79,20 @@ function FormularioPasantia() {
     "Datos Adicionales",
   ];
 
-  // Límites de palabras
-  const MIN_ANTECEDENTES = 200;
-  const MAX_ANTECEDENTES = 350;
-  const MIN_DESCR_EMP = 1200;
-  const MAX_DESCR_EMP = 1500;
-  const MIN_ACTIVIDADES = 550;
-  const MAX_ACTIVIDADES = 650;
-  // const MIN_ASESORES = 100;
-  // const MAX_ASESORES = 200;
-
   function nextStep() {
     setCurrentStep((p) => Math.min(p + 1, steps.length - 1));
   }
-
   function prevStep() {
     setCurrentStep((p) => Math.max(p - 1, 0));
   }
 
+  // -----------------------------
+  // Manejo de inputs
+  // -----------------------------
   function handleChange(e) {
     const { name, value } = e.target;
     if (name.startsWith("supervisor.")) {
+      // Para campos del supervisor, actualizamos supervisor de forma anidada
       const field = name.split(".")[1];
       setFormData((prev) => ({
         ...prev,
@@ -93,18 +110,31 @@ function FormularioPasantia() {
       return updated;
     });
   }
-
   function addField(setter, def) {
     setter((prev) => [...prev, def]);
   }
-
   function removeField(setter, index) {
     setter((prev) => prev.filter((_, i) => i !== index));
   }
 
+  // -----------------------------
+  // Límites de palabras
+  // -----------------------------
+  const MIN_ANTECEDENTES = 200;
+  const MAX_ANTECEDENTES = 350;
+  const MIN_DESCR_EMP = 1200;
+  const MAX_DESCR_EMP = 1500;
+  const MIN_ACTIVIDADES = 550;
+  const MAX_ACTIVIDADES = 650;
+  // (Ej. const MIN_ASESORES = 100, etc.)
+
+  // -----------------------------
+  // Envío del formulario final
+  // -----------------------------
   async function handleSubmit(e) {
     e.preventDefault();
 
+    // Validar que haya subido todos los docs requeridos
     if (
       !rutaInscripcion ||
       !rutaCertificacion ||
@@ -115,6 +145,7 @@ function FormularioPasantia() {
       return;
     }
 
+    // Validaciones de palabras
     const wAntecedentes = countWords(formData.antecedentesInstitucion);
     if (wAntecedentes < MIN_ANTECEDENTES || wAntecedentes > MAX_ANTECEDENTES) {
       alert("Los Antecedentes no cumplen con la métrica (200 a 350 palabras).");
@@ -123,7 +154,9 @@ function FormularioPasantia() {
 
     const wDescripcion = countWords(formData.descripcionEmpresa);
     if (wDescripcion < MIN_DESCR_EMP || wDescripcion > MAX_DESCR_EMP) {
-      alert("La Descripción de la Empresa no cumple con la métrica (1200 a 1500 palabras).");
+      alert(
+        "La Descripción de la Empresa no cumple con la métrica (1200 a 1500 palabras)."
+      );
       return;
     }
 
@@ -133,12 +166,7 @@ function FormularioPasantia() {
       return;
     }
 
-    // const wAsesores = countWordsArray(formData.asesores);
-    // if (wAsesores < MIN_ASESORES || wAsesores > MAX_ASESORES) {
-    //   alert("Los Asesores Propuestos no cumplen con la métrica (100 a 200 palabras).");
-    //   return;
-    // }
-
+    // Construir objeto final
     const jsonData = {
       trabajoGraduacion: {
         titulo: formData.nombreEmpresa,
@@ -178,11 +206,14 @@ function FormularioPasantia() {
       },
     };
 
+    // 1. Enviar el JSON al backend
     try {
-      console.log(jsonData);
       const response = await authFetch(`${API_URL}/api/pasantias/crear-completa`, {
         method: "POST",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
         body: JSON.stringify(jsonData),
       });
       if (!response.ok) {
@@ -190,25 +221,37 @@ function FormularioPasantia() {
       }
       const result = await response.json();
       const trabajoId = result.trabajoGraduacion.id;
+
+      // 2. Asociar usuario con el trabajo
       const segundoPost = await authFetch(
         `${API_URL}/api/miembros-trabajo/add?trabajoId=${trabajoId}&usuarioId=${userId}`,
         {
           method: "POST",
-          headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
         }
       );
       if (!segundoPost.ok) {
         throw new Error("Error al asociar el usuario.");
       }
       alert("Formulario enviado correctamente y usuario asociado.");
+      navigate("/inicio");
     } catch (err) {
+      console.error("Error al procesar la solicitud:", err);
       alert("Error al procesar la solicitud. Por favor, intenta de nuevo.");
     }
   }
 
+  // -----------------------------
+  // Render
+  // -----------------------------
   return (
     <div className="form-container">
       <h2>Formulario de Pasantías</h2>
+
+      {/* Tabs (pasos) */}
       <div className="tabs">
         {steps.map((s, i) => (
           <div
@@ -222,12 +265,11 @@ function FormularioPasantia() {
       </div>
 
       <form onSubmit={handleSubmit}>
+        {/* Paso 0: Portada */}
         {currentStep === 0 && (
           <div className="form-step">
             <label>Fecha de Inicio</label>
-            <p className="help-text">
-              Indica la fecha en la que iniciarás tu pasantía.
-            </p>
+            <p className="help-text">Indica la fecha en la que iniciarás tu pasantía.</p>
             <input
               type="date"
               name="Fecha_inicio"
@@ -235,10 +277,9 @@ function FormularioPasantia() {
               onChange={handleChange}
               required
             />
+
             <label>Fecha de Fin</label>
-            <p className="help-text">
-              Indica la fecha estimada de finalización de tu pasantía.
-            </p>
+            <p className="help-text">Fecha estimada de finalización de tu pasantía.</p>
             <input
               type="date"
               name="Fecha_fin"
@@ -249,6 +290,7 @@ function FormularioPasantia() {
           </div>
         )}
 
+        {/* Paso 1: Antecedentes de la Institución */}
         {currentStep === 1 && (
           <div className="form-step">
             <label>Antecedentes de la Institución (200 a 350 palabras)</label>
@@ -263,16 +305,19 @@ function FormularioPasantia() {
               required
             />
             <small>
-              Palabras: {countWords(formData.antecedentesInstitucion)} / {MIN_ANTECEDENTES} - {MAX_ANTECEDENTES}
+              Palabras: {countWords(formData.antecedentesInstitucion)} / {MIN_ANTECEDENTES} -{" "}
+              {MAX_ANTECEDENTES}
             </small>
           </div>
         )}
 
+        {/* Paso 2: Descripción de la Empresa */}
         {currentStep === 2 && (
           <div className="form-step">
             <label>Descripción de la Empresa (1200 a 1500 palabras)</label>
             <p className="help-text">
-              Explica los departamentos, áreas, procesos y mercado de la empresa donde realizarás la pasantía.
+              Explica los departamentos, áreas, procesos y mercado de la empresa
+              donde realizarás la pasantía.
             </p>
             <textarea
               name="descripcionEmpresa"
@@ -282,13 +327,12 @@ function FormularioPasantia() {
               required
             />
             <small>
-              Palabras: {countWords(formData.descripcionEmpresa)} / {MIN_DESCR_EMP} - {MAX_DESCR_EMP}
+              Palabras: {countWords(formData.descripcionEmpresa)} / {MIN_DESCR_EMP} -{" "}
+              {MAX_DESCR_EMP}
             </small>
 
             <label>Nombre de la Empresa</label>
-            <p className="help-text">
-              Indica el nombre oficial de la empresa o institución.
-            </p>
+            <p className="help-text">Nombre oficial de la empresa.</p>
             <input
               type="text"
               name="nombreEmpresa"
@@ -298,9 +342,7 @@ function FormularioPasantia() {
             />
 
             <label>Contacto de la Empresa</label>
-            <p className="help-text">
-              Persona o vía de contacto principal.
-            </p>
+            <p className="help-text">Persona o vía de contacto principal.</p>
             <input
               type="text"
               name="contactoEmpresa"
@@ -310,9 +352,7 @@ function FormularioPasantia() {
             />
 
             <label>Dirección de la Empresa</label>
-            <p className="help-text">
-              Ubicación física de la empresa.
-            </p>
+            <p className="help-text">Ubicación física.</p>
             <textarea
               name="direccionEmpresa"
               value={formData.direccionEmpresa}
@@ -323,15 +363,18 @@ function FormularioPasantia() {
           </div>
         )}
 
+        {/* Paso 3: Actividades a Desarrollar */}
         {currentStep === 3 && (
           <div className="form-step">
             <label>Actividades a Desarrollar (550 a 650 palabras)</label>
             <p className="help-text">
-              Lista las macro-actividades que realizarás y sus descripciones breves.
+              Lista las macro-actividades que realizarás y descripciones breves.
             </p>
             <small>
-              Palabras totales: {countWordsArray(actividades)} / {MIN_ACTIVIDADES} - {MAX_ACTIVIDADES}
+              Palabras totales: {countWordsArray(actividades)} / {MIN_ACTIVIDADES} -{" "}
+              {MAX_ACTIVIDADES}
             </small>
+
             {actividades.map((act, idx) => (
               <div key={idx} style={{ marginBottom: "5px" }}>
                 <input
@@ -355,12 +398,14 @@ function FormularioPasantia() {
           </div>
         )}
 
+        {/* Paso 4: Datos del Supervisor */}
         {currentStep === 4 && (
           <div className="form-step">
             <label>Datos del Supervisor Empresarial</label>
             <p className="help-text">
               Ingresa la información de contacto y cargo del supervisor designado.
             </p>
+
             <label>Nombre del Supervisor</label>
             <input
               type="text"
@@ -369,6 +414,7 @@ function FormularioPasantia() {
               onChange={handleChange}
               required
             />
+
             <label>Cargo del Supervisor</label>
             <input
               type="text"
@@ -377,6 +423,7 @@ function FormularioPasantia() {
               onChange={handleChange}
               required
             />
+
             <label>Contacto del Supervisor</label>
             <input
               type="text"
@@ -388,13 +435,12 @@ function FormularioPasantia() {
           </div>
         )}
 
+        {/* Paso 5: Asesores Propuestos */}
         {currentStep === 5 && (
           <div className="form-step">
             <label>Asesores Propuestos (100 a 200 palabras)</label>
-            <p className="help-text">
-              Lista el/los asesores que propones para tu pasantía (máx 3). 
-            </p>
-           
+            <p className="help-text">Lista el/los asesores (máx 3).</p>
+
             {formData.asesores.map((asesor, i) => (
               <div key={i} style={{ marginBottom: "5px" }}>
                 <input
@@ -443,82 +489,69 @@ function FormularioPasantia() {
           </div>
         )}
 
+        {/* Paso 6: Documentos de Soporte */}
         {currentStep === 6 && (
           <div className="form-step">
             <h4>Documentos de Soporte</h4>
 
             <label>Inscripción de Trabajo de Graduación</label>
-            <p className="help-text">
-              Sube la impresión o archivo que demuestre la inscripción.
-            </p>
+            <p className="help-text">Sube el archivo de tu inscripción.</p>
             <FileUpload
               fileName="inscripcion_trabajo_graduacion"
-              initialUploaded={archivosSubidos["inscripcion_trabajo_graduacion"]}
-              onSuccess={(ruta) => {
+              selectedFile={inscripcionFile}
+              isUploaded={inscripcionUploaded}
+              onFileSelect={(file) => setInscripcionFile(file)}
+              onSetIsUploaded={(uploaded, ruta) => {
+                setInscripcionUploaded(uploaded);
                 setRutaInscripcion(ruta);
-                setArchivosSubidos((p) => ({
-                  ...p,
-                  inscripcion_trabajo_graduacion: true,
-                }));
               }}
             />
-            {rutaInscripcion && <p>{rutaInscripcion}</p>}
+            {rutaInscripcion && <p>Ruta: {rutaInscripcion}</p>}
 
             <label>Certificación Global de Notas</label>
-            <p className="help-text">
-              Sube la copia de tu certificación global de notas.
-            </p>
+            <p className="help-text">Sube la certificación global de notas.</p>
             <FileUpload
               fileName="certificacion_global_notas"
-              initialUploaded={archivosSubidos["certificacion_global_notas"]}
-              onSuccess={(ruta) => {
+              selectedFile={certificacionFile}
+              isUploaded={certificacionUploaded}
+              onFileSelect={(file) => setCertificacionFile(file)}
+              onSetIsUploaded={(uploaded, ruta) => {
+                setCertificacionUploaded(uploaded);
                 setRutaCertificacion(ruta);
-                setArchivosSubidos((p) => ({
-                  ...p,
-                  certificacion_global_notas: true,
-                }));
               }}
             />
-            {rutaCertificacion && <p>{rutaCertificacion}</p>}
+            {rutaCertificacion && <p>Ruta: {rutaCertificacion}</p>}
 
             <label>Constancia de Servicio Social</label>
-            <p className="help-text">
-              Sube la constancia emitida por decanato.
-            </p>
+            <p className="help-text">Sube la constancia de tu servicio social.</p>
             <FileUpload
               fileName="constancia_servicio_social"
-              initialUploaded={archivosSubidos["constancia_servicio_social"]}
-              onSuccess={(ruta) => {
+              selectedFile={servicioSocialFile}
+              isUploaded={servicioSocialUploaded}
+              onFileSelect={(file) => setServicioSocialFile(file)}
+              onSetIsUploaded={(uploaded, ruta) => {
+                setServicioSocialUploaded(uploaded);
                 setRutaServicioSocial(ruta);
-                setArchivosSubidos((p) => ({
-                  ...p,
-                  constancia_servicio_social: true,
-                }));
               }}
             />
-            {rutaServicioSocial && <p>{rutaServicioSocial}</p>}
+            {rutaServicioSocial && <p>Ruta: {rutaServicioSocial}</p>}
 
             <label>Carta de Aceptación</label>
-            <p className="help-text">
-              Sube la carta firmada por el representante legal o RRHH.
-            </p>
+            <p className="help-text">Sube la carta firmada de la empresa.</p>
             <FileUpload
               fileName="carta_aceptacion"
-              initialUploaded={archivosSubidos["carta_aceptacion"]}
-              onSuccess={(ruta) => {
+              selectedFile={cartaFile}
+              isUploaded={cartaUploaded}
+              onFileSelect={(file) => setCartaFile(file)}
+              onSetIsUploaded={(uploaded, ruta) => {
+                setCartaUploaded(uploaded);
                 setRutaCartaAceptacion(ruta);
-                setArchivosSubidos((p) => ({
-                  ...p,
-                  carta_aceptacion: true,
-                }));
               }}
             />
-            {rutaCartaAceptacion && <p>{rutaCartaAceptacion}</p>}
+            {rutaCartaAceptacion && <p>Ruta: {rutaCartaAceptacion}</p>}
 
             <label>Fecha de Aceptación</label>
-            <p className="help-text">
-              Indica la fecha en que se emitió la carta de aceptación.
-            </p>
+            <p className="help-text">Fecha en que se emitió la carta.</p>
             <input
               type="date"
               name="cartaAceptacionFecha"
@@ -529,6 +562,7 @@ function FormularioPasantia() {
           </div>
         )}
 
+        {/* Botones de navegación */}
         <div className="navigation-buttons">
           {currentStep > 0 && (
             <button type="button" onClick={prevStep}>

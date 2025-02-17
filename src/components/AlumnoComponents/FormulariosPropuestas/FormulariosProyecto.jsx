@@ -199,6 +199,8 @@ export default function FormulariosProyecto() {
     };
 
     try {
+
+      console.log(bodyData);
       const response = await authFetch(
         `${API_URL}/api/proyectos/crear-completo`,
         {
@@ -231,7 +233,7 @@ export default function FormulariosProyecto() {
       
       for (const correo of correosValidos) {
         const extraPost = await authFetch(
-          `${API_URL}/api/miembros-trabajo/add-by-email?trabajoId=${trabajoId}&correo=${encodeURIComponent(correo)}`,
+          `${API_URL}/api/miembros-trabajo/add-by-email?trabajoId=${trabajoId}&email=${encodeURIComponent(correo)}`,
           {
             method: "POST",
             headers: {

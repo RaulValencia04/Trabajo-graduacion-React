@@ -18,17 +18,24 @@
   background-color: #f1f1f1;
 }
 
-/* Color especial al arrastrar */
+/* Estado arrastrando */
 .dropzone.isDragActive {
-  background-color: #fff3c4; /* Un amarillo claro */
+  background-color: #fff3c4; 
 }
 
 /* Previsualización de archivo */
 .file-preview {
   margin-top: 20px;
-  text-align: center; /* Centra la previsualización */
+  text-align: center;
 }
 
+/* Contenedor relativo para colocar la X encima */
+.file-preview-image-container {
+  position: relative;
+  display: inline-block; /* Para que la X quede sobre la imagen */
+}
+
+/* Imagen */
 .preview-image {
   max-width: 100%;
   max-height: 200px;
@@ -36,8 +43,32 @@
   border-radius: 5px;
   padding: 10px;
   background-color: #f9f9f9;
-  margin: 0 auto; /* Centra la imagen */
+  margin: 0 auto;
   display: block;
+}
+
+/* Botón para quitar la imagen */
+.remove-button {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  background: #edc542;
+  color: white;
+  border: none;
+  font-size: 18px;
+  cursor: pointer;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  line-height: 0.95; 
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.remove-button:hover {
+  background-color: #d1a735;
 }
 
 /* Botones */
@@ -50,7 +81,7 @@ button[type="button"] {
   cursor: pointer;
   transition: background-color 0.3s ease;
   display: block;
-  margin: 20px auto; /* Centra el botón */
+  margin: 20px auto;
 }
 
 button[type="button"]:hover {
@@ -61,7 +92,7 @@ button[type="button"]:hover {
 input[type="text"] {
   width: 100%;
   padding: 10px;
-  margin: 10px 0; /* Añade margen superior e inferior */
+  margin: 10px 0; 
   box-sizing: border-box;
   border: 1px solid #ccc;
   border-radius: 5px;
@@ -86,8 +117,8 @@ input[type="text"] {
 
 /* Clases auxiliares */
 .input-f {
-  margin: 10px auto; /* Centra los inputs */
-  max-width: 500px;  /* Establece un ancho máximo */
+  margin: 10px auto; 
+  max-width: 500px;  
 }
 
 .title {

@@ -3,6 +3,7 @@ import React, { useState, useContext, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from './Context/AuthContext';
 import './Login.css';
+import logo from '../../img/icon.png'; // Importa la imagen
 
 const Login = () => {
   const API_URL = process.env.REACT_APP_API_URL;
@@ -84,6 +85,9 @@ const Login = () => {
 
   return (
     <div className="login-container">
+      {/* Imagen arriba del formulario */}
+      <img src={logo} alt="Logo" className="login-logo" />
+      
       <div className="login-box">
         <h2 className="login-title">Iniciar Sesión</h2>
         <form onSubmit={handleLogin}>
@@ -127,3 +131,7 @@ const Login = () => {
 };
 
 export default Login;
+
+
+
+

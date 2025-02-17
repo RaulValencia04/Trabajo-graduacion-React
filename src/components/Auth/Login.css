@@ -1,79 +1,79 @@
-/* 📌 Centrar el formulario de login */
+/* Contenedor principal con imagen de fondo */
 .login-container {
   display: flex;
   justify-content: center;
   align-items: center;
   height: 100vh;
-  width: 4000px;
-  background: linear-gradient(to bottom, #edbc42, #880c09);
+  width: 100vw;
+  background: #f8f8f8;
+  flex-direction: column;
 }
 
-/* 📌 Caja del formulario */
+/* Imagen superior */
+.login-logo {
+  width: 150px; /* Ajusta el tamaño según necesites */
+  height: auto;
+  margin-bottom: 10px;
+}
+
+/* Caja del login */
 .login-box {
   background: white;
-  padding: 40px;
-  border-radius: 15px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-  max-width: 400px;
-  width: 100%;
+  padding: 30px;
+  border-radius: 10px;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+  width: 350px;
   text-align: center;
 }
 
-/* 📌 Título del Login */
+/* Título */
 .login-title {
-  font-size: 26px;
-  margin-bottom: 20px;
+  font-size: 22px;
   font-weight: bold;
   color: #880c09;
-  border-bottom: 3px solid #edbc42;
-  display: inline-block;
-  padding-bottom: 5px;
+  margin-bottom: 15px;
 }
 
-/* 📌 Inputs con diseño mejorado */
+/* Grupo de inputs */
 .form-group {
-  margin-bottom: 20px;
+  margin-bottom: 15px;
   text-align: left;
 }
 
+/* Etiquetas */
 .form-group label {
-  font-weight: bold;
+  font-size: 14px;
+  font-weight: 600;
   color: #333;
 }
 
+/* Campos de entrada */
 .form-control {
   width: 100%;
-  padding: 12px;
+  padding: 10px;
   font-size: 16px;
-  border: 2px solid #edbc42;
-  border-radius: 8px;
-  box-sizing: border-box;
-  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  background: #f9f9f9;
+  transition: all 0.3s;
 }
 
 .form-control:focus {
   border-color: #880c09;
+  background: white;
   outline: none;
-  box-shadow: 0 0 8px rgba(136, 12, 9, 0.4);
 }
 
-/* 📌 Estilo de los mensajes de error */
-.error-message {
-  color: #880c09;
-  margin-top: 10px;
-  font-weight: bold;
-}
-
-/* 📌 Botón de Login */
+/* Botones */
 .btn {
-  padding: 12px 20px;
+  width: 100%;
+  padding: 12px;
   font-size: 16px;
   font-weight: bold;
   border: none;
-  border-radius: 8px;
+  border-radius: 6px;
   cursor: pointer;
-  width: 100%;
-  transition: background-color 0.3s ease, transform 0.2s ease;
+  transition: 0.3s ease;
 }
 
 .btn-primary {
@@ -82,25 +82,24 @@
 }
 
 .btn-primary:hover {
-  background-color: #a2100e;
-  transform: scale(1.05);
+  background-color: #6e0a07;
 }
 
-/* 📌 Botón de Registro */
 .btn-secondary {
-  background-color: #edbc42;
+  background: none;
   color: #880c09;
   border: 2px solid #880c09;
   margin-top: 10px;
 }
 
 .btn-secondary:hover {
-  background-color: #f0c75e;
-  border-color: #a2100e;
-  transform: scale(1.05);
+  background: #880c09;
+  color: white;
 }
 
-/* 📌 Efecto para los botones en general */
-.btn:active {
-  transform: scale(0.98);
+/* Mensaje de error */
+.error-message {
+  color: #d9534f;
+  font-size: 14px;
+  margin-top: 10px;
 }

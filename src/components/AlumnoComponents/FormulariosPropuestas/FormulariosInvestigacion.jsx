@@ -45,7 +45,12 @@ export default function FormulariosProyecto() {
     metodologia: "",
     entregables: [""],
     cronograma: [{ actividad: "", fechaInicio: "", fechaFin: "" }],
-    actores: [""],
+    actores: {
+      patrocinador: { nombre: "", descripcion: "" },
+      beneficiario: { nombre: "", descripcion: "" },
+      ejecutor: { nombre: "", descripcion: "" },
+      financista: { nombre: "", descripcion: "" },
+    },
     asesoresPropuestos: [{ nombre: "" }],
     cartaAceptacion: [{ documento: "", fecha: "" }],
     inscripcionTrabajoGraduacion: "",
@@ -104,8 +109,15 @@ export default function FormulariosProyecto() {
   async function handleSubmit(e) {
     e.preventDefault();
 
-    if (!rutaInscripcion || !rutaCertificacion || !rutaServicioSocial || !rutaCartaAceptacion) {
-      alert("Por favor, sube todos los documentos requeridos (Inscripción, Certificación, Constancia y Carta).");
+    if (
+      !rutaInscripcion ||
+      !rutaCertificacion ||
+      !rutaServicioSocial ||
+      !rutaCartaAceptacion
+    ) {
+      alert(
+        "Por favor, sube todos los documentos requeridos (Inscripción, Certificación, Constancia y Carta)."
+      );
       return;
     }
 
@@ -152,7 +164,25 @@ export default function FormulariosProyecto() {
           fechaInicio: c.fechaInicio,
           fechaFin: c.fechaFin,
         })),
-        actores: proyectoData.actores.filter((a) => a.trim() !== ""),
+        // Aquí pasas el objeto actores completo
+        actores: {
+          patrocinador: {
+            nombre: proyectoData.actores.patrocinador.nombre.trim(),
+            descripcion: proyectoData.actores.patrocinador.descripcion.trim(),
+          },
+          beneficiario: {
+            nombre: proyectoData.actores.beneficiario.nombre.trim(),
+            descripcion: proyectoData.actores.beneficiario.descripcion.trim(),
+          },
+          ejecutor: {
+            nombre: proyectoData.actores.ejecutor.nombre.trim(),
+            descripcion: proyectoData.actores.ejecutor.descripcion.trim(),
+          },
+          financista: {
+            nombre: proyectoData.actores.financista.nombre.trim(),
+            descripcion: proyectoData.actores.financista.descripcion.trim(),
+          },
+        },
         asesoresPropuestos: proyectoData.asesoresPropuestos
           .filter((asesor) => asesor.nombre.trim() !== "")
           .map((asesor) => ({ nombre: asesor.nombre.trim() })),
@@ -169,11 +199,17 @@ export default function FormulariosProyecto() {
     };
 
     try {
-      const response = await authFetch(`${API_URL}/api/proyectos/crear-completo`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-        body: JSON.stringify(bodyData),
-      });
+      const response = await authFetch(
+        `${API_URL}/api/proyectos/crear-completo`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify(bodyData),
+        }
+      );
       if (!response.ok) {
         throw new Error("Error al enviar los datos al backend");
       }
@@ -181,8 +217,34 @@ export default function FormulariosProyecto() {
       const trabajoId = result.trabajoGraduacion.id;
       const segundoPost = await authFetch(
         `${API_URL}/api/miembros-trabajo/add?trabajoId=${trabajoId}&usuarioId=${userId}`,
-        { method: "POST", headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` } }
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
       );
+      const correosValidos = [correosExtras.uno, correosExtras.dos].filter(
+        (correo) => correo.trim() !== ""
+      );
+      
+      for (const correo of correosValidos) {
+        const extraPost = await authFetch(
+          `${API_URL}/api/miembros-trabajo/add-by-email?trabajoId=${trabajoId}&email=${encodeURIComponent(correo)}`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+      
+        if (!extraPost.ok) {
+          console.error(`Error al agregar el correo ${correo} como miembro.`);
+        }
+      }
       if (!segundoPost.ok) {
         throw new Error("Error al asociar el usuario al trabajo de graduación");
       }
@@ -195,7 +257,7 @@ export default function FormulariosProyecto() {
 
   return (
     <div className="form-container">
-      <h2>Formulario de Investigación</h2>
+      <h2>Formulario de Proyecto</h2>
       <div className="tabs">
         {steps.map((step, idx) => (
           <div
@@ -213,7 +275,7 @@ export default function FormulariosProyecto() {
           <div className="form-step">
             <label>Título</label>
             <p className="help-text">
-              Escribe el nombre oficial de tu Investigación.
+              Escribe el nombre oficial de tu proyecto.
             </p>
             <input
               type="text"
@@ -235,7 +297,8 @@ export default function FormulariosProyecto() {
               required
             />
             <small>
-              Palabras: {countWords(trabajoData.descripcion)} / {MAX_DESC_TRABAJO}
+              Palabras: {countWords(trabajoData.descripcion)} /{" "}
+              {MAX_DESC_TRABAJO}
             </small>
 
             <label>Fecha de Inicio</label>
@@ -268,7 +331,8 @@ export default function FormulariosProyecto() {
           <div className="form-step">
             <label>Descripción del problema (máx 900)</label>
             <p className="help-text">
-              Explica detalladamente el problema o la oportunidad que se abordará.
+              Explica detalladamente el problema o la oportunidad que se
+              abordará.
             </p>
             <textarea
               name="problema"
@@ -293,12 +357,14 @@ export default function FormulariosProyecto() {
               required
             />
             <small>
-              Palabras: {countWords(proyectoData.justificacion)} / {MAX_JUSTIFICACION}
+              Palabras: {countWords(proyectoData.justificacion)} /{" "}
+              {MAX_JUSTIFICACION}
             </small>
 
             <label>Alcance (máx 300)</label>
             <p className="help-text">
-              Define el alcance específico de tu proyecto (qué incluye y hasta dónde llega).
+              Define el alcance específico de tu proyecto (qué incluye y hasta
+              dónde llega).
             </p>
             <textarea
               name="alcance"
@@ -327,7 +393,8 @@ export default function FormulariosProyecto() {
               required
             />
             <small>
-              Palabras: {countWords(proyectoData.descripcionObjetivos)} / {MAX_DESCR_OBJETIVOS}
+              Palabras: {countWords(proyectoData.descripcionObjetivos)} /{" "}
+              {MAX_DESCR_OBJETIVOS}
             </small>
 
             <label>Objetivos (lista)</label>
@@ -382,7 +449,8 @@ export default function FormulariosProyecto() {
           <div className="form-step">
             <label>Alumnos Encargados (Correos)</label>
             <p className="help-text">
-              Si eres el único, deja estos campos vacíos. Si hay otros alumnos, ingresa sus correos.
+              Si eres el único, deja estos campos vacíos. Si hay otros alumnos,
+              ingresa sus correos.
             </p>
             <input
               type="text"
@@ -443,7 +511,10 @@ export default function FormulariosProyecto() {
                 if (proyectoData.asesoresPropuestos.length < 3) {
                   setProyectoData((prev) => ({
                     ...prev,
-                    asesoresPropuestos: [...prev.asesoresPropuestos, { nombre: "" }],
+                    asesoresPropuestos: [
+                      ...prev.asesoresPropuestos,
+                      { nombre: "" },
+                    ],
                   }));
                 } else {
                   alert("Máximo 3 asesores.");
@@ -458,60 +529,188 @@ export default function FormulariosProyecto() {
 
         {currentStep === 4 && (
           <div className="form-step">
-            <label>Actores</label>
+            <h4>Actores Principales</h4>
             <p className="help-text">
-              Lista de actores (patrocinador, beneficiarios, equipo, etc.).
+              Por favor, proporciona el nombre y una breve descripción para cada
+              uno de los siguientes actores: Patrocinador, Beneficiario,
+              Ejecutor y Financista. Explica su rol y aportes en el proyecto.
             </p>
-            {proyectoData.actores.map((actor, idx) => (
-              <div key={idx} style={{ marginBottom: "5px" }}>
-                <input
-                  type="text"
-                  placeholder={`Actor ${idx + 1}`}
-                  value={actor}
-                  onChange={(e) =>
-                    setProyectoData((prev) => ({
-                      ...prev,
-                      actores: prev.actores.map((a, i) =>
-                        i === idx ? e.target.value : a
-                      ),
-                    }))
-                  }
-                  required
-                />
-                <button
-                  type="button"
-                  onClick={() =>
-                    setProyectoData((prev) => ({
-                      ...prev,
-                      actores: prev.actores.filter((_, i) => i !== idx),
-                    }))
-                  }
-                  disabled={proyectoData.actores.length <= 1}
-                >
-                  -
-                </button>
-              </div>
-            ))}
-            <button
-              type="button"
-              onClick={() =>
+
+            {/* Patrocinador */}
+            <label>Patrocinador</label>
+            <input
+              type="text"
+              placeholder="Nombre del patrocinador"
+              value={proyectoData.actores.patrocinador.nombre}
+              onChange={(e) =>
                 setProyectoData((prev) => ({
                   ...prev,
-                  actores: [...prev.actores, ""],
+                  actores: {
+                    ...prev.actores,
+                    patrocinador: {
+                      ...prev.actores.patrocinador,
+                      nombre: e.target.value,
+                    },
+                  },
                 }))
               }
-            >
-              + Agregar Actor
-            </button>
+              required
+            />
 
+            <label>Patrocinador (descripción)</label>
+            <textarea
+              rows="3"
+              placeholder="Rol y aportes del patrocinador"
+              value={proyectoData.actores.patrocinador.descripcion}
+              onChange={(e) =>
+                setProyectoData((prev) => ({
+                  ...prev,
+                  actores: {
+                    ...prev.actores,
+                    patrocinador: {
+                      ...prev.actores.patrocinador,
+                      descripcion: e.target.value,
+                    },
+                  },
+                }))
+              }
+              required
+            />
+
+            {/* Beneficiario */}
+            <label>Beneficiario</label>
+            <input
+              type="text"
+              placeholder="Nombre del beneficiario"
+              value={proyectoData.actores.beneficiario.nombre}
+              onChange={(e) =>
+                setProyectoData((prev) => ({
+                  ...prev,
+                  actores: {
+                    ...prev.actores,
+                    beneficiario: {
+                      ...prev.actores.beneficiario,
+                      nombre: e.target.value,
+                    },
+                  },
+                }))
+              }
+              required
+            />
+
+            <label>Beneficiario (descripción)</label>
+            <textarea
+              rows="3"
+              placeholder="Rol y aportes del beneficiario"
+              value={proyectoData.actores.beneficiario.descripcion}
+              onChange={(e) =>
+                setProyectoData((prev) => ({
+                  ...prev,
+                  actores: {
+                    ...prev.actores,
+                    beneficiario: {
+                      ...prev.actores.beneficiario,
+                      descripcion: e.target.value,
+                    },
+                  },
+                }))
+              }
+              required
+            />
+
+            {/* Ejecutor */}
+            <label>Ejecutor</label>
+            <input
+              type="text"
+              placeholder="Nombre del ejecutor"
+              value={proyectoData.actores.ejecutor.nombre}
+              onChange={(e) =>
+                setProyectoData((prev) => ({
+                  ...prev,
+                  actores: {
+                    ...prev.actores,
+                    ejecutor: {
+                      ...prev.actores.ejecutor,
+                      nombre: e.target.value,
+                    },
+                  },
+                }))
+              }
+              required
+            />
+
+            <label>Ejecutor (descripción)</label>
+            <textarea
+              rows="3"
+              placeholder="Rol y aportes del ejecutor"
+              value={proyectoData.actores.ejecutor.descripcion}
+              onChange={(e) =>
+                setProyectoData((prev) => ({
+                  ...prev,
+                  actores: {
+                    ...prev.actores,
+                    ejecutor: {
+                      ...prev.actores.ejecutor,
+                      descripcion: e.target.value,
+                    },
+                  },
+                }))
+              }
+              required
+            />
+
+            {/* Financista */}
+            <label>Financista</label>
+            <input
+              type="text"
+              placeholder="Nombre del financista"
+              value={proyectoData.actores.financista.nombre}
+              onChange={(e) =>
+                setProyectoData((prev) => ({
+                  ...prev,
+                  actores: {
+                    ...prev.actores,
+                    financista: {
+                      ...prev.actores.financista,
+                      nombre: e.target.value,
+                    },
+                  },
+                }))
+              }
+              required
+            />
+
+            <label>Financista (descripción)</label>
+            <textarea
+              rows="3"
+              placeholder="Rol y aportes del financista"
+              value={proyectoData.actores.financista.descripcion}
+              onChange={(e) =>
+                setProyectoData((prev) => ({
+                  ...prev,
+                  actores: {
+                    ...prev.actores,
+                    financista: {
+                      ...prev.actores.financista,
+                      descripcion: e.target.value,
+                    },
+                  },
+                }))
+              }
+              required
+            />
+
+            {/* Fecha de Aceptación (Carta) */}
             <label>Fecha de Aceptación (Carta)</label>
             <p className="help-text">
-              Fecha en la que la carta de aceptación fue firmada.
+              Indica la fecha en que se firmó o emitió la carta de aceptación.
             </p>
             <input
               type="date"
               value={proyectoData.cartaAceptacion[0].fecha}
-              onChange={(e) => handleCartaAceptacionChange("fecha", e.target.value)}
+              onChange={(e) =>
+                handleCartaAceptacionChange("fecha", e.target.value)
+              }
               required
             />
           </div>
@@ -522,12 +721,12 @@ export default function FormulariosProyecto() {
             <h4>Documentos</h4>
 
             <label>Inscripción de Trabajo de Graduación</label>
-            <p className="help-text">
-              Subir comprobante de la inscripción.
-            </p>
+            <p className="help-text">Subir comprobante de la inscripción.</p>
             <FileUpload
               fileName="inscripcion_trabajo_graduacion"
-              initialUploaded={archivosSubidos["inscripcion_trabajo_graduacion"]}
+              initialUploaded={
+                archivosSubidos["inscripcion_trabajo_graduacion"]
+              }
               onSuccess={(ruta) => {
                 setRutaInscripcion(ruta);
                 setArchivosSubidos((prev) => ({

@@ -37,7 +37,7 @@ const PlanesAsesorList = () => {
 
         const data = await response.json();
         setPlanes(data);
-        setFilteredPlanes(data); // Inicializar con todos los datos
+        setFilteredPlanes(data); 
       } catch (err) {
         setError(err.message);
       } finally {
@@ -50,23 +50,23 @@ const PlanesAsesorList = () => {
     }
   }, [API_URL, userId, token, authFetch]);
 
-  // Manejo de filtros y búsqueda
+  
   useEffect(() => {
     let filtrados = planes;
 
-    // Filtrar por validación
+    
     if (filtroValidado !== "Todos") {
       filtrados = filtrados.filter((plan) =>
         filtroValidado === "Sí" ? plan.planValidado : !plan.planValidado
       );
     }
 
-    // Filtrar por tipo de trabajo
+    
     if (filtroTipo !== "Todos") {
       filtrados = filtrados.filter((plan) => plan.planTipo === filtroTipo);
     }
 
-    // Filtrar por búsqueda general
+    
     if (busqueda.trim() !== "") {
       const lowerSearch = busqueda.toLowerCase();
       filtrados = filtrados.filter(
@@ -95,7 +95,7 @@ const PlanesAsesorList = () => {
     <div className="planes-container">
       <h2 className="planes-title">Planes de Trabajo Asignados</h2>
 
-      {/* 🔹 Filtros y búsqueda */}
+      
       <div className="filtros-container">
         <div className="form-group">
           <label>Filtrar por Validación:</label>

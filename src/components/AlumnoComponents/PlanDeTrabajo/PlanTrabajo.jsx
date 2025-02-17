@@ -18,13 +18,9 @@ export const PlanTrabajo = () => {
   const [error, setError] = useState(null);
   const [trabajoEnProgreso, setTrabajoEnProgreso] = useState(null);
   const [planValidado, setPlanValidado] = useState(false);
-  // const [modalOpen, setModalOpen] = useState(false);
   const [planDetalle, setPlanDetalle] = useState(null);
+  const [enRevision, setEnRevision] = useState(false); // Nuevo estado para controlar si está en revisión
 
-  /**
-   * 🚀 Función para obtener detalles del plan de trabajo si ya existe.
-   * Se usa `useCallback` para evitar cambios innecesarios en `useEffect`.
-   */
   const fetchPlanDetalle = useCallback(
     async (planId) => {
       try {
@@ -46,13 +42,20 @@ export const PlanTrabajo = () => {
 
         const data = await response.json();
         setPlanDetalle(data);
+
+        // 🚀 Verificar si está en revisión (Sin observaciones y no validado aún)
+        if (
+          !data.validado &&
+          (!data.observaciones || data.observaciones.trim() === "")
+        ) {
+          setEnRevision(true);
+        }
       } catch (err) {
         console.error("Error al cargar los detalles del plan:", err.message);
       }
     },
     [API_URL, token, authFetch]
   );
-
 
   useEffect(() => {
     const fetchData = async () => {
@@ -101,11 +104,10 @@ export const PlanTrabajo = () => {
         const { existe, planId } = await respEstadoPlan.json();
 
         if (existe) {
-          // Si el plan existe y fue rechazado, obtenemos los detalles
+          // Si el plan existe y fue rechazado o en revisión, obtenemos los detalles
           await fetchPlanDetalle(planId);
         }
 
-        // 🚀 Verificar si el plan ya está validado
         const respPlan = await authFetch(
           `${API_URL}/api/planes-trabajo/trabajo/${trabajoId}/validado`,
           {
@@ -157,30 +159,52 @@ export const PlanTrabajo = () => {
       ) : (
         <div>
           <h2>Plan de Trabajo</h2>
-        
 
-          {planDetalle?.observaciones && (
-            <div className={`alert ${planValidado ? "alert-success" : "alert-danger"}`}>
-              <h4>Observaciones del Asesor:</h4>
-              <p>{planDetalle.observaciones}</p>
+          {enRevision ? (
+            <div className="alert alert-warning">
+              <h4>Tu plan de trabajo está en revisión.</h4>
+              <p>
+                Tu asesor aún no ha evaluado tu plan. Por favor, espera su
+                revisión.
+              </p>
             </div>
-          )}
+          ) : planDetalle?.observaciones ? (
+            <div>
+              {/* Mostrar la alerta de observaciones si existen */}
+              <div
+                className={`alert ${
+                  planValidado ? "alert-success" : "alert-danger"
+                }`}
+              >
+                <h4>Observaciones del Asesor:</h4>
+                <p>{planDetalle.observaciones}</p>
+              </div>
 
+              {/* Mostrar la alerta de "espera aprobación" solo si el plan NO está validado */}
+              {!planValidado && (
+                <div className="alert alert-warning">
+                  <h6>
+                    Nota: si ya realizaste los cambios, solo espera la
+                    aprobación de tu asesor.
+                  </h6>
+                </div>
+              )}
+            </div>
+          ) : null}
 
           {planValidado ? (
             <div>
               <h4>Ya tienes un plan validado.</h4>
               <p>No es posible editar uno nuevo en este momento.</p>
             </div>
-          ) : (
+          ) : !enRevision ? (
             <FormulariosPlanesTrabajo
               trabajoId={trabajoEnProgreso.trabajo_id}
               tipoTrabajo={trabajoEnProgreso.tipoTrabajo}
               trabajoData={trabajoEnProgreso}
               planData={planDetalle}
             />
-          )}
-          
+          ) : null}
         </div>
       )}
     </div>
